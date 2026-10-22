@@ -1,12 +1,12 @@
 ﻿$ErrorActionPreference='Stop'
 $root=$PSScriptRoot
-$file=Join-Path $root '.runtime/postgres-processes.json'
-if(!(Test-Path -LiteralPath $file)){Write-Output 'Không có thông tin tiến trình VetClinic.';exit}
-$state=Get-Content -Raw -LiteralPath $file|ConvertFrom-Json
-foreach($processId in @($state.backendPid,$state.frontendPid)){
- $process=Get-CimInstance Win32_Process -Filter "ProcessId=$processId" -ErrorAction SilentlyContinue
- if(!$process){continue}
- if(!$process.CommandLine -or !$process.CommandLine.Contains($root)){throw "Tiến trình $processId không còn là bản VetClinic đã khởi động; không dừng."}
- Stop-Process -Id $processId -ErrorAction Stop
+$apiMarker=[IO.Path]::GetFullPath((Join-Path $root 'vetclinic/target/vetclinic-0.0.1-SNAPSHOT.jar'))
+$uiMarker=[IO.Path]::GetFullPath((Join-Path $root 'frontend/node_modules/vite/bin/vite.js'))
+# Find the actual Java child; saved launcher PIDs may be stale.
+$processes=Get-CimInstance Win32_Process|Where-Object {
+ if(!$_.CommandLine){return $false}
+ $line=$_.CommandLine.Replace('/','\')
+ return (($_.Name -eq 'java.exe' -and $line.Contains($apiMarker.Replace('/','\'))) -or ($_.Name -eq 'node.exe' -and $line.Contains($uiMarker.Replace('/','\'))))
 }
+foreach($process in $processes){Stop-Process -Id $process.ProcessId -ErrorAction Stop}
 Write-Output 'Đã dừng frontend/backend VetClinic. PostgreSQL và dữ liệu vẫn được giữ nguyên.'

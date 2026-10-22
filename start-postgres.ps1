@@ -8,9 +8,26 @@ $jar=Join-Path $backend 'target/vetclinic-0.0.1-SNAPSHOT.jar'
 if(!(Test-Path -LiteralPath $jar)){throw 'Chưa có bản build backend. Chạy .\mvnw.cmd package trong thư mục vetclinic.'}
 if(!(Test-Path -LiteralPath (Join-Path $frontend 'dist/index.html'))){throw 'Chưa có bản build frontend. Chạy npm.cmd run build trong thư mục frontend.'}
 $docker=(Get-Command docker -ErrorAction Stop).Source
-foreach($port in @($BackendPort,$FrontendPort)){
- if(Get-NetTCPConnection -State Listen -LocalPort $port -ErrorAction SilentlyContinue){throw "Cổng $port đang được sử dụng. Không khởi động thêm bản thứ hai."}
+function Get-ClinicListener([int]$Port,[string]$Marker){
+ $listener=Get-NetTCPConnection -State Listen -LocalPort $Port -ErrorAction SilentlyContinue|Select-Object -First 1
+ if(!$listener){return $null}
+ $process=Get-CimInstance Win32_Process -Filter "ProcessId=$($listener.OwningProcess)"
+ if(!$process.CommandLine -or !$process.CommandLine.Replace('/','\').Contains($Marker.Replace('/','\'))){throw "Cổng $Port đang được chương trình khác sử dụng. Không tự dừng chương trình đó."}
+ return $process
 }
+$apiMarker=[IO.Path]::GetFullPath($jar)
+$uiMarker=[IO.Path]::GetFullPath((Join-Path $frontend 'node_modules/vite/bin/vite.js'))
+$runningApi=Get-ClinicListener $BackendPort $apiMarker
+$runningUi=Get-ClinicListener $FrontendPort $uiMarker
+if($runningApi -and $runningUi){
+ $health=Invoke-RestMethod "http://127.0.0.1:$FrontendPort/api/health" -TimeoutSec 10
+ if($health.status -ne 'UP'){throw 'VetClinic chưa sẵn sàng. Chạy .\stop-postgres-app.ps1 rồi mở lại.'}
+ New-Item -ItemType Directory -Force $state|Out-Null
+ @{backendPid=$runningApi.ProcessId;frontendPid=$runningUi.ProcessId;database='vetclinic';engine='PostgreSQL';frontendUrl="http://127.0.0.1:$FrontendPort";backendUrl="http://127.0.0.1:$BackendPort";checkedAt=(Get-Date -Format o)}|ConvertTo-Json|Set-Content -LiteralPath (Join-Path $state 'postgres-processes.json') -Encoding utf8
+ Write-Output "VetClinic đã chạy và sẵn sàng. Mở http://127.0.0.1:$FrontendPort"
+ return
+}
+if($runningApi -or $runningUi){throw 'VetClinic đang chạy một phần. Chạy .\stop-postgres-app.ps1 rồi .\start-postgres.ps1 để mở lại.'}
 & $docker compose -f (Join-Path $backend 'compose.yaml') start postgres
 if($LASTEXITCODE -ne 0){throw 'Không khởi động được container PostgreSQL hiện có.'}
 $container=& $docker compose -f (Join-Path $backend 'compose.yaml') ps -q postgres
@@ -54,6 +71,17 @@ try{
  $ui=Start-Process -FilePath $Node -WindowStyle Hidden -WorkingDirectory $frontend -ArgumentList @(('"'+(Join-Path $frontend 'node_modules/vite/bin/vite.js')+'"'),'preview','--host','127.0.0.1','--port',"$FrontendPort",'--strictPort') -RedirectStandardOutput (Join-Path $state 'postgres-frontend.log') -RedirectStandardError (Join-Path $state 'postgres-frontend-error.log') -PassThru
  @{backendPid=$api.Id;frontendPid=$ui.Id;database='vetclinic';engine='PostgreSQL';frontendUrl="http://127.0.0.1:$FrontendPort";backendUrl="http://127.0.0.1:$BackendPort";startedAt=(Get-Date -Format o)}|ConvertTo-Json|Set-Content -LiteralPath (Join-Path $state 'postgres-processes.json') -Encoding utf8
 }finally{foreach($key in $prior.Keys){[Environment]::SetEnvironmentVariable($key,$prior[$key],'Process')}}
+$healthy=$false
+for($attempt=0;$attempt -lt 60;$attempt++){
+ try{
+  $actualApi=Get-ClinicListener $BackendPort $apiMarker
+  $actualUi=Get-ClinicListener $FrontendPort $uiMarker
+  if($actualApi -and $actualUi -and (Invoke-RestMethod "http://127.0.0.1:$FrontendPort/api/health" -TimeoutSec 2).status -eq 'UP'){$healthy=$true;break}
+ }catch{}
+ Start-Sleep -Seconds 1
+}
+if(!$healthy){throw "VetClinic chưa sẵn sàng. Xem log trong $state; chạy .\stop-postgres-app.ps1 trước khi thử lại."}
+@{backendPid=$actualApi.ProcessId;frontendPid=$actualUi.ProcessId;database='vetclinic';engine='PostgreSQL';frontendUrl="http://127.0.0.1:$FrontendPort";backendUrl="http://127.0.0.1:$BackendPort";startedAt=(Get-Date -Format o)}|ConvertTo-Json|Set-Content -LiteralPath (Join-Path $state 'postgres-processes.json') -Encoding utf8
 Write-Output "Đã khởi động VetClinic với PostgreSQL. Giao diện: http://127.0.0.1:$FrontendPort"
 Write-Output "Tài khoản quản trị cục bộ: $credentials"
 Write-Output "Nhật ký khởi động: $(Join-Path $state 'postgres-backend.log')"
