@@ -1,4 +1,4 @@
-param([string]$Java='java',[string]$Node='node',[int]$BackendPort=8080,[int]$FrontendPort=5173)
+﻿param([string]$Java='java',[string]$Node='node',[int]$BackendPort=8080,[int]$FrontendPort=5173)
 $ErrorActionPreference='Stop'
 $root=$PSScriptRoot
 $backend=Join-Path $root 'vetclinic'
@@ -34,10 +34,10 @@ New-Item -ItemType Directory -Force $state|Out-Null
 $credentials=Join-Path $state 'postgres-access.json'
 if(!(Test-Path -LiteralPath $credentials)){
  $bytes=New-Object byte[] 24
- [Security.Cryptography.RandomNumberGenerator]::Fill($bytes)
+ $rng=[Security.Cryptography.RandomNumberGenerator]::Create(); try{$rng.GetBytes($bytes)}finally{$rng.Dispose()}
  $password=[Convert]::ToBase64String($bytes).Replace('+','A').Replace('/','B').TrimEnd('=')
  $jwtBytes=New-Object byte[] 48
- [Security.Cryptography.RandomNumberGenerator]::Fill($jwtBytes)
+ $rng=[Security.Cryptography.RandomNumberGenerator]::Create(); try{$rng.GetBytes($jwtBytes)}finally{$rng.Dispose()}
  @{email='local-admin-20261022@vetclinic.local';password=$password;jwtSecret=[Convert]::ToBase64String($jwtBytes)}|ConvertTo-Json|Set-Content -LiteralPath $credentials -Encoding utf8
 }
 $credential=Get-Content -Raw -LiteralPath $credentials|ConvertFrom-Json

@@ -1,4 +1,4 @@
-param([switch]$Offline)
+﻿param([switch]$Offline)
 $ErrorActionPreference='Stop'
 $root=Split-Path -Parent $PSScriptRoot
 $backend=Join-Path $root 'vetclinic'
