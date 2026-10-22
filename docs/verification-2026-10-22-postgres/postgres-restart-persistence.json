@@ -1,0 +1,9 @@
+{
+  "inventoryPersisted": true,
+  "paidInvoicePersisted": true,
+  "backendRestarted": true,
+  "checkedAt": "2026-10-22T20:01:46.0740935+07:00",
+  "petPersisted": true,
+  "database": "vetclinic_http_20261022_195651",
+  "engine": "PostgreSQL"
+}

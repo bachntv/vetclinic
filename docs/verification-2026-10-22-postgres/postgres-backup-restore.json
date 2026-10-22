@@ -1,0 +1,22 @@
+{
+  "backup": "vetclinic-before-upgrade-20261022-195028.dump",
+  "restoredAt": "2026-10-22T19:52:54.8382440+07:00",
+  "sha256": "15D1A1129C63E06C0FA65CD497F6D6D8EB0DA047F606CC635C84583E406B4A39",
+  "rowCountsMatch": true,
+  "restoredDatabase": "vetclinic_restore_20261022_195252",
+  "engine": "PostgreSQL 17.11",
+  "counts": [
+    "invoice_items|0",
+    "invoices|0",
+    "medicines|0",
+    "owners|2",
+    "pet_weight_records|0",
+    "pets|2",
+    "prescription_items|0",
+    "prescriptions|0",
+    "users|2",
+    "vaccinations|0",
+    "vets|0",
+    "visits|0"
+  ]
+}

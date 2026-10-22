@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(properties={"spring.datasource.url=jdbc:h2:mem:workflow-test;DB_CLOSE_DELAY=-1", "app.bootstrap-admin.email=", "app.bootstrap-admin.password=", "app.bootstrap-admin.full-name="})
+@SpringBootTest(properties={"spring.datasource.url=${WORKFLOW_TEST_DATABASE_URL:jdbc:h2:mem:workflow-test;DB_CLOSE_DELAY=-1}", "app.bootstrap-admin.email=", "app.bootstrap-admin.password=", "app.bootstrap-admin.full-name="})
 @AutoConfigureMockMvc @ActiveProfiles("test") @Transactional
 class ClinicWorkflowTests {
     @Autowired MockMvc mvc;
