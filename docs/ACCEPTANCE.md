@@ -39,11 +39,11 @@ npm.cmd ci
 npm.cmd run dev
 ```
 
-4. Mở http://localhost:5173; đăng xuất/đăng nhập lại. Tài khoản cũ vẫn dùng mật khẩu cũ. Không có mật khẩu test mới được ghi vào database thật.
+4. Mở http://localhost:5173; đăng xuất/đăng nhập lại. Tài khoản cũ vẫn dùng mật khẩu cũ. Ngày 22/10 đã tạo thêm quản trị cục bộ; các tài khoản cũ giữ nguyên. Cấu hình truy cập chỉ lưu tại .runtime, không đưa lên GitHub.
 
 ## Kiểm tra chức năng bằng dữ liệu thử riêng
 
-Không ghi tên bệnh nhân thật vào nghiệm thu. Tạo dữ liệu thử chỉ sau khi người phụ trách đồng ý; backend unit/integration test dùng H2 in-memory độc lập.
+Không ghi tên bệnh nhân thật vào nghiệm thu. Tạo dữ liệu thử chỉ sau khi người phụ trách đồng ý; backend có thể kiểm thử bằng H2 hoặc các database PostgreSQL riêng do scripts/test-postgres.ps1 tạo.
 
 | Bước | Vai trò | Kết quả mong đợi |
 |---|---|---|
@@ -67,9 +67,9 @@ Ghi ngày, phiên bản, người chạy, kết quả thực tế và ảnh minh
 
 ## Kiểm thử tự động và giới hạn
 
-Backend: mvnw.cmd test (H2), frontend: npm.cmd run build và npm.cmd test. Test không ghi PostgreSQL. H2 không thay thế kiểm thử PostgreSQL đối với migration, khóa cạnh tranh và kiểu dữ liệu. Chưa có bộ E2E tự động toàn giao diện.
+Backend: mvnw.cmd test mặc định dùng H2; scripts/test-postgres.ps1 chạy cùng bộ test trên PostgreSQL tách biệt. Ngày 22/10 đạt 31/31 backend PostgreSQL, 8/8 frontend API và build thành công. 13 kiểm tra HTTP, cạnh tranh đặt lịch/trừ kho và dữ liệu qua restart cũng đã đạt. Chưa có bộ E2E tự động toàn giao diện.
 
-Môi trường Codex hiện không truy cập được Docker named pipe. SQL 003, backup/restore và chạy ứng dụng mới trên PostgreSQL thật cần được kiểm chứng sau khi chạy lệnh trên. Kiểm tra pg_restore --list chỉ chứng minh archive đọc được, chưa chứng minh restore toàn bộ thành công. Thử restore vào database kiểm thử tách biệt trước khi vận hành chính thức.
+Docker đã hoạt động ngày 22/10. Đã backup, áp dụng SQL 002/003 giữ nguyên số bản ghi của 12 bảng gốc, restore toàn bộ backup vào database riêng và đối chiếu thành công. Xem docs/POSTGRES-RUN.md và bằng chứng verification-2026-10-22-postgres.
 
 ## Mẫu ghi nhận phản hồi (chưa có dữ liệu khảo sát)
 
@@ -79,4 +79,4 @@ Ngày / vai trò / tác vụ / kết quả mong đợi / thực tế / ảnh ho�
 
 Cần địa chỉ máy chủ/tên miền và quyền triển khai thực tế. Build frontend bằng npm.cmd run build; phục vụ dist với SPA fallback, reverse proxy /api tới backend; Vite proxy chỉ dành phát triển. Dùng HTTPS, JWT_SECRET riêng (không đặt trong biến VITE), cấu hình PostgreSQL riêng, backup có lịch và thử restore. Không dùng secret mặc định của local ngoài Internet. Chưa triển khai production trong đợt này.
 
-Chưa triển khai AI/RAG. Kho tri thức hiện có title/content/source, chưa có embeddings hoặc truy hồi. Các nghiệp vụ thương mại ngoài phạm vi báo cáo như SMS, ngân hàng, PetShop/spa, kéo-thả lịch, hoàn tồn do hủy đơn chưa được bổ sung trong đợt đối chiếu này.
+Đã tích hợp trợ lý trích hồ sơ có nguồn và Ollama embeddings/LLM tùy cấu hình; mô hình thật chưa được chạy/đánh giá. Các nghiệp vụ thương mại ngoài phạm vi báo cáo như SMS, ngân hàng, PetShop/spa, kéo-thả lịch, hoàn tồn do hủy đơn chưa được bổ sung trong đợt đối chiếu này.

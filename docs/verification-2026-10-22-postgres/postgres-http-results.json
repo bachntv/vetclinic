@@ -1,0 +1,54 @@
+[
+  {
+    "name": "API health through frontend proxy",
+    "passed": true
+  },
+  {
+    "name": "React entry page served",
+    "passed": true
+  },
+  {
+    "name": "Trial admin login",
+    "passed": true
+  },
+  {
+    "name": "Owner and pet created",
+    "passed": true
+  },
+  {
+    "name": "Walk-in checked in",
+    "passed": true
+  },
+  {
+    "name": "Medical record saved",
+    "passed": true
+  },
+  {
+    "name": "Prescription deducts inventory",
+    "passed": true
+  },
+  {
+    "name": "Vaccination persisted",
+    "passed": true
+  },
+  {
+    "name": "Invoice finalized and paid",
+    "passed": true
+  },
+  {
+    "name": "Assistant retrieves clinical source",
+    "passed": true
+  },
+  {
+    "name": "Missing evidence is explicit",
+    "passed": true
+  },
+  {
+    "name": "Disabled AI returns 503",
+    "passed": true
+  },
+  {
+    "name": "Receptionist denied assistant",
+    "passed": true
+  }
+]

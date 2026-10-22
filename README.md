@@ -5,7 +5,13 @@ Theo dõi: [Tiến độ và công việc còn thiếu](docs/PROGRESS.md).
 
 Ứng dụng tiếng Việt phát triển tiếp trên backend Spring Boot/Java 21 và frontend React/TypeScript strict/Vite hiện có. Dự án `../veterinary-clinic-management-system` là tham chiếu phạm vi nghiệp vụ; không sao chép hoặc thay thế database mẫu.
 
-## Khởi động hằng ngày
+## Chạy PostgreSQL trên máy đã thiết lập
+
+Ngày 22/10/2026: đã chạy PostgreSQL 17.11, backend 8080, frontend build 5173; 31 kiểm thử backend và 13 kiểm tra HTTP PostgreSQL đều đạt. Đã kiểm chứng backup/restore và dữ liệu qua restart.
+
+Mở Docker Desktop, rồi từ thư mục gốc chạy `.\start-postgres.ps1`. Dừng ứng dụng bằng `.\stop-postgres-app.ps1`. Xem [hướng dẫn PostgreSQL](docs/POSTGRES-RUN.md) và [kết quả](docs/verification-2026-10-22-postgres/).
+
+## Chạy chế độ phát triển
 
 1. Mở Docker Desktop.
 2. PowerShell thứ nhất:
@@ -28,9 +34,9 @@ npm.cmd run dev
 
 ## Nâng cấp database hiện có (một lần)
 
-Chưa tự thực thi migration trên PostgreSQL đang dùng. Dừng backend trước. Sao lưu database bằng pgAdmin hoặc `pg_dump`. Hai migration `002_staff_workspace.sql` và `003_report_alignment.sql` trong `vetclinic/docs/migrations/`: thêm vai trò, hỗ trợ/tri thức, danh mục vaccine, thu hồi JWT và trường hồ sơ. Không xóa tài khoản hoặc hồ sơ.
+Ngày 22/10 đã thực thi migration 002/003 trên PostgreSQL đang dùng, sau khi tạo backup và đối chiếu dữ liệu. Dừng backend trước. Sao lưu database bằng pgAdmin hoặc `pg_dump`. Hai migration `002_staff_workspace.sql` và `003_report_alignment.sql` trong `vetclinic/docs/migrations/`: thêm vai trò, hỗ trợ/tri thức, danh mục vaccine, thu hồi JWT và trường hồ sơ. Không xóa tài khoản hoặc hồ sơ.
 
-Cách khuyến nghị: tại thư mục backend chạy `.\scripts\upgrade-db.ps1`. Script tạo backup custom-format vào `backups/`, kiểm tra archive bằng pg_restore --list, lưu SHA256, áp dụng migration và đối chiếu số lượng dữ liệu trong 12 bảng gốc. Script đã kiểm tra cú pháp; chưa chạy thực tế vì sandbox không truy cập được Docker named pipe. Chưa kiểm thử restore toàn bộ backup.
+Cách khuyến nghị: tại thư mục backend chạy `.\scripts\upgrade-db.ps1`. Script tạo backup custom-format vào `backups/`, kiểm tra archive bằng pg_restore --list, lưu SHA256, áp dụng migration và đối chiếu số lượng dữ liệu trong 12 bảng gốc. Script đã chạy thành công; đã thử khôi phục đầy đủ backup vào database riêng và đối chiếu số bản ghi của 12 bảng gốc.
 
 Cách thủ công thay thế (sau khi tự backup): mở SQL trong pgAdmin Query Tool vào database vetclinic, hoặc PowerShell tại thư mục backend:
 
@@ -39,7 +45,7 @@ Get-Content -Raw .\docs\migrations\002_staff_workspace.sql | docker compose exec
 Get-Content -Raw .\docs\migrations\003_report_alignment.sql | docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U postgres -d vetclinic
 ```
 
-Sau đó chạy lại backend và đăng nhập lại (JWT cũ không có credential stamp sẽ hết hiệu lực). Hibernate local vẫn dùng ddl-auto=update, chưa phải hệ thống Flyway tự quản lý phiên bản. Migration trên là SQL có kiểm soát dành cho database đang có; chưa kiểm chứng trên PostgreSQL thật của người dùng.
+Sau đó chạy lại backend và đăng nhập lại (JWT cũ không có credential stamp sẽ hết hiệu lực). Hibernate local vẫn dùng ddl-auto=update, chưa phải hệ thống Flyway tự quản lý phiên bản. Migration trên là SQL có kiểm soát dành cho database đang có; đã kiểm chứng trên PostgreSQL 17.11 của máy người dùng.
 
 ## Các màn hình
 
@@ -81,7 +87,7 @@ npm.cmd run build
 npm.cmd test
 ```
 
-Test nghiệp vụ dùng H2 riêng, không kết nối PostgreSQL: quyền từng vai trò, luồng khám/kê đơn/thanh toán, chặn trùng lịch, khóa/đổi mật khẩu vô hiệu token, cân nặng lịch sử, riêng tư hỗ trợ và khôi phục thú cưng. Mockito dùng Java agent qua Surefire để tương thích sandbox Windows.
+Mặc định test dùng H2. Chạy ``.\scripts\test-postgres.ps1`` từ thư mục gốc để dùng các database PostgreSQL mới, tách biệt dữ liệu vận hành. Đã đạt 31/31 bài trên PostgreSQL: quyền từng vai trò, luồng khám/kê đơn/thanh toán, chặn trùng lịch, khóa/đổi mật khẩu vô hiệu token, cân nặng lịch sử, riêng tư hỗ trợ và khôi phục thú cưng. Mockito dùng Java agent qua Surefire để tương thích sandbox Windows.
 
 ## Giới hạn cần biết
 
@@ -90,7 +96,7 @@ Test nghiệp vụ dùng H2 riêng, không kết nối PostgreSQL: quyền từn
 - Doanh thu nhóm theo tháng lập hóa đơn đã thanh toán, chưa lưu giao dịch/thời điểm thu tiền riêng. Đánh dấu PAID không phải cổng thanh toán.
 - Chưa có SMTP/SMS, file đính kèm, kiểm tra tương tác thuốc, refresh token, chỉnh/hủy đơn thuốc và hoàn tồn kho.
 - Đã có trợ lý bệnh án: trích hồ sơ có nguồn và tích hợp Ollama embeddings/LLM tùy cấu hình. Chưa kiểm chứng chất lượng mô hình thật hoặc dùng pgvector. Xem `docs/AI-RAG.md`.
-- Trước production: migration tự động được kiểm chứng, kiểm thử PostgreSQL, backup/restore, HTTPS/reverse proxy, secret riêng và giám sát. Không đưa secret backend vào biến VITE.
+- Đã kiểm chứng PostgreSQL, migration thủ công và backup/restore cục bộ. Trước triển khai Internet vẫn cần HTTPS/reverse proxy, migration tự động, giám sát và chính sách backup. Không đưa secret backend vào biến VITE.
 
 Hướng dẫn nghiệm thu và vận hành chi tiết: [docs/ACCEPTANCE.md](docs/ACCEPTANCE.md). Chưa có kết quả nghiệm thu người dùng hoặc triển khai production.
 
@@ -99,4 +105,5 @@ Hướng dẫn nghiệm thu và vận hành chi tiết: [docs/ACCEPTANCE.md](doc
 ADMIN/VET truy cập mục Trợ lý bệnh án. Chế độ trích hồ sơ chạy không cần mô hình. Chế độ AI cần Ollama và cấu hình trong docs/AI-RAG.md.
 
 Bản thử nghiệm riêng: đóng gói backend bằng `./mvnw.cmd package`, cài frontend bằng `npm.cmd ci`, rồi từ thư mục gốc chạy `./start-trial.ps1`. Giao diện cổng 15173, API cổng 18080, chỉ nghe loopback. Dữ liệu H2 file nằm trong vetclinic/demo-data, tách khỏi PostgreSQL hiện có. Tài khoản ngẫu nhiên nằm trong .trial/credentials.json; không commit file này. Biên bản phản hồi tại docs/USER-TRIAL.md đang chờ người dùng thực tế.
+
 

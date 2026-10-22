@@ -1,0 +1,16 @@
+{
+  "oversellingPrevented": true,
+  "stockAfterConcurrentRequests": 1.0,
+  "duplicateBookingPrevented": true,
+  "initialStock": 3,
+  "bookingStatuses": [
+    201,
+    409
+  ],
+  "checkedAt": "2026-10-22T20:00:39.0113313+07:00",
+  "prescriptionStatuses": [
+    201,
+    409
+  ],
+  "database": "vetclinic_http_20261022_195651"
+}

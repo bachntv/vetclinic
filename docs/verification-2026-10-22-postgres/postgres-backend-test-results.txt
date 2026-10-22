@@ -1,0 +1,13 @@
+	Database version: 17.11
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 40.95 s -- in com.bach.vetclinic.AssistantTests
+	Database version: 17.11
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.961 s -- in com.bach.vetclinic.AuthSecurityTests
+	Database version: 17.11
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 24.73 s -- in com.bach.vetclinic.ClinicWorkflowTests
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.842 s -- in com.bach.vetclinic.LocalAiGatewayTests
+	Database version: 17.11
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.113 s -- in com.bach.vetclinic.VetclinicApplicationTests
+[INFO] Tests run: 31, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+[INFO] Total time:  01:35 min
+[INFO] Finished at: 2026-10-22T19:54:33+07:00
