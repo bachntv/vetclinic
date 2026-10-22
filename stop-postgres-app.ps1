@@ -1,4 +1,4 @@
-$ErrorActionPreference='Stop'
+﻿$ErrorActionPreference='Stop'
 $root=$PSScriptRoot
 $file=Join-Path $root '.runtime/postgres-processes.json'
 if(!(Test-Path -LiteralPath $file)){Write-Output 'Không có thông tin tiến trình VetClinic.';exit}

@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 $backendPath = Split-Path -Parent $PSScriptRoot
 $projectPath = Split-Path -Parent $backendPath
 $backupDirectory = Join-Path $projectPath 'backups'

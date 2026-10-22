@@ -1,4 +1,4 @@
-param([string]$Java='java',[string]$Node='node')
+﻿param([string]$Java='java',[string]$Node='node')
 $ErrorActionPreference='Stop'
 $root=$PSScriptRoot
 $backend=Join-Path $root 'vetclinic'
