@@ -15,7 +15,7 @@ export interface Vaccination extends Base {petId:number;petName:string;vaccineTy
 export interface Visit extends Base {petId:number;petName:string;vetId:number;vetName:string;scheduledAt:string;status:VisitStatus;chiefComplaint:string|null;symptoms:string|null;diagnosis:string|null;treatmentNotes:string|null;followUpDate:string|null;warnings:string[]}
 export interface Weight {id:number;petId:number;weightKg:number;recordedAt:string;note:string|null}
 export interface PrescriptionItem {id:number;medicineId:number;medicineName:string;unit:string;dosage:string;frequency:string;durationDays:number;quantity:number;unitPrice:number;instructions:string|null}
-export interface Prescription {id:number;visitId:number;petName:string;notes:string|null;items:PrescriptionItem[];prescribedAt:string}
+export interface Prescription {id:number;visitId:number;petName:string;notes:string|null;items:PrescriptionItem[];prescribedAt:string;status:'ACTIVE'|'CANCELLED';revision:number;cancelledAt:string|null;cancelReason:string|null}
 export interface InvoiceItem {id:number;description:string;category:InvoiceCategory;quantity:number;unitPrice:number;lineTotal:number}
 export interface Invoice {id:number;visitId:number;petId:number;petName:string;issuedAt:string;subtotal:number;vatRate:number;vatAmount:number;total:number;status:InvoiceStatus;items:InvoiceItem[]}
 export interface Page<T> {content:T[];total:number;pages:number;page:number}
@@ -27,3 +27,4 @@ export interface SearchRow {id:number;name?:string;petName?:string;firstName?:st
 export type SearchResults=Record<'owners'|'pets'|'visits',SearchRow[]>;
 export interface NotificationRow {id:number;petId?:number;petName?:string;name?:string;scheduledAt?:string;nextDueDate?:string|null;followUpDate?:string|null;stockQuantity?:number;unit?:string}
 export type NotificationsData=Record<'appointments'|'vaccinations'|'followUps'|'lowStock',NotificationRow[]>;
+

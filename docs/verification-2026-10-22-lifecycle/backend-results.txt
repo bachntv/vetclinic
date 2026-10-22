@@ -1,0 +1,8 @@
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 29.40 s -- in com.bach.vetclinic.AssistantTests
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.181 s -- in com.bach.vetclinic.AuthSecurityTests
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 17.31 s -- in com.bach.vetclinic.ClinicWorkflowTests
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.728 s -- in com.bach.vetclinic.LocalAiGatewayTests
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.086 s -- in com.bach.vetclinic.PrescriptionLifecycleTests
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.176 s -- in com.bach.vetclinic.VetclinicApplicationTests
+[INFO] Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS

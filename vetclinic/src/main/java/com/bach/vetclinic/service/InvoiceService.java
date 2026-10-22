@@ -18,10 +18,12 @@ import java.util.List;
 public class InvoiceService {
     private final InvoiceRepository invoiceRepository;
     private final VisitRepository visitRepository;
+    private final AuditService audit;
+    @jakarta.persistence.PersistenceContext private jakarta.persistence.EntityManager entityManager;
 
-    public InvoiceService(InvoiceRepository invoiceRepository, VisitRepository visitRepository) {
+    public InvoiceService(InvoiceRepository invoiceRepository, VisitRepository visitRepository, AuditService audit) {
         this.invoiceRepository = invoiceRepository;
-        this.visitRepository = visitRepository;
+        this.visitRepository = visitRepository;this.audit=audit;
     }
 
     @Transactional(readOnly = true)
@@ -34,7 +36,7 @@ public class InvoiceService {
     }
 
     public Invoice create(Long visitId, BigDecimal vatRate, List<ItemData> items) {
-        Visit visit = visitRepository.findWithDetailsById(visitId)
+        Visit visit = visitRepository.findWithDetailsByIdForUpdate(visitId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy lượt khám có mã " + visitId));
         if (visit.getStatus() == VisitStatus.CANCELLED) {
             throw new ConflictException("Không thể lập hóa đơn cho lượt khám đã hủy");
@@ -56,6 +58,9 @@ public class InvoiceService {
 
     public Invoice changeStatus(Long id, InvoiceStatus nextStatus) {
         Invoice invoice = findById(id);
+        var lockedVisit=visitRepository.findWithDetailsByIdForUpdate(invoice.getVisit().getId()).orElseThrow();
+        entityManager.refresh(invoice);entityManager.refresh(lockedVisit);
+        var previous=invoice.getStatus().name();
         if (nextStatus == InvoiceStatus.SENT) {
             requireDraft(invoice);
             if (invoice.getVisit().getStatus() != VisitStatus.COMPLETED) {
@@ -72,6 +77,7 @@ public class InvoiceService {
             throw new ConflictException("Không thể chuyển hóa đơn trở lại trạng thái nháp");
         }
         invoice.setStatus(nextStatus);
+        audit.record(nextStatus==InvoiceStatus.PAID?"PAYMENT_RECORDED":"INVOICE_FINALIZED","INVOICE",id,null,java.util.Map.of("status",previous),java.util.Map.of("status",nextStatus.name(),"total",invoice.getTotal()));
         return invoice;
     }
 
@@ -100,3 +106,4 @@ public class InvoiceService {
 
     public record ItemData(String description, InvoiceItemCategory category, BigDecimal quantity, BigDecimal unitPrice) {}
 }
+

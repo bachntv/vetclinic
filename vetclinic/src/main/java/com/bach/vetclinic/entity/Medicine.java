@@ -57,6 +57,7 @@ public class Medicine extends BaseEntity {
     }
 
     public void deductStock(BigDecimal quantity) { stockQuantity = stockQuantity.subtract(quantity); }
+    public void restoreStock(BigDecimal quantity) { stockQuantity = stockQuantity.add(quantity); }
     public void setActive(boolean active) { this.active = active; }
     public Long getId() { return super.getId(); }
     public String getName() { return name; }

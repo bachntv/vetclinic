@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
+    boolean existsByVisitIdAndStatusIn(Long visitId,List<com.bach.vetclinic.entity.InvoiceStatus> statuses);
     @EntityGraph(attributePaths = {"items", "visit", "visit.pet", "visit.pet.owner", "visit.vet"})
     List<Invoice> findAllByOrderByIssuedAtDesc();
 

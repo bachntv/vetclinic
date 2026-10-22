@@ -18,12 +18,13 @@ import java.util.List;
 @Transactional
 public class VisitService {
     private final VisitRepository visitRepository;
+    private final AuditService audit;
     private final PetRepository petRepository;
     private final VetService vetService;
     private final com.bach.vetclinic.repository.VetRepository vets;
 
-    public VisitService(VisitRepository visitRepository, PetRepository petRepository, VetService vetService, com.bach.vetclinic.repository.VetRepository vets) {
-        this.visitRepository = visitRepository;
+    public VisitService(VisitRepository visitRepository, PetRepository petRepository, VetService vetService, com.bach.vetclinic.repository.VetRepository vets, AuditService audit) {
+        this.visitRepository = visitRepository; this.audit=audit;
         this.petRepository = petRepository;
         this.vetService = vetService;
         this.vets = vets;
@@ -56,19 +57,18 @@ public class VisitService {
                 petId, List.of(VisitStatus.IN_EXAM, VisitStatus.COMPLETED));
     }
 
-    public Visit updateMedicalRecord(Long id, String diagnosis, String treatmentNotes,
-                                     java.time.LocalDate followUpDate) {
-        Visit visit = findById(id);
-        if (visit.getStatus() != VisitStatus.IN_EXAM && visit.getStatus() != VisitStatus.COMPLETED) {
-            throw new ConflictException("Chỉ có thể cập nhật hồ sơ khi lượt khám đang hoặc đã khám");
-        }
-        visit.updateMedicalRecord(diagnosis, treatmentNotes, followUpDate);
-        return visit;
+    public Visit updateMedicalRecord(Long id,String diagnosis,String treatmentNotes,java.time.LocalDate followUpDate){
+        return updateMedicalRecord(id,diagnosis,treatmentNotes,followUpDate,findById(id).getSymptoms());
     }
     public Visit updateMedicalRecord(Long id,String diagnosis,String treatmentNotes,java.time.LocalDate followUpDate,String symptoms){
-        var visit=updateMedicalRecord(id,diagnosis,treatmentNotes,followUpDate);visit.setSymptoms(symptoms);return visit;
+        var visit=visitRepository.findWithDetailsByIdForUpdate(id).orElseThrow(()->new NotFoundException("Không tìm thấy lượt khám"));
+        if(visit.getStatus()!=VisitStatus.IN_EXAM && visit.getStatus()!=VisitStatus.COMPLETED)throw new ConflictException("Chỉ có thể cập nhật hồ sơ khi lượt khám đang hoặc đã khám");
+        var before=new MedicalState(visit.getSymptoms(),visit.getDiagnosis(),visit.getTreatmentNotes(),visit.getFollowUpDate());
+        visit.updateMedicalRecord(diagnosis,treatmentNotes,followUpDate);visit.setSymptoms(symptoms);
+        audit.record("MEDICAL_RECORD_UPDATED","VISIT",id,null,before,new MedicalState(symptoms,diagnosis,treatmentNotes,followUpDate));
+        return visit;
     }
-
+    private record MedicalState(String symptoms,String diagnosis,String treatmentNotes,java.time.LocalDate followUpDate){}
     public Visit createEncounter(Long petId,Long vetId,LocalDateTime at,String chiefComplaint){
         at=at==null?LocalDateTime.now():at;
         ensureSlot(vetId,at,-1L,true);
@@ -150,3 +150,4 @@ public class VisitService {
         if (!petRepository.existsById(id)) throw new NotFoundException("Không tìm thấy thú cưng có mã " + id);
     }
 }
+
