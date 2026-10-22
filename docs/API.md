@@ -96,3 +96,11 @@ Invoice: `{visitId,vatRate,items:[{description,category,quantity,unitPrice}]}`. 
 | PUT / DELETE | /knowledge/{id} | ADMIN sửa/xóa tài liệu |
 
 Các API tổng hợp/search hiện đọc danh sách trong bộ nhớ; cần aggregate truy vấn khi tăng dữ liệu. Support chưa gửi mail. Knowledge là dữ liệu văn bản có nguồn, chưa có retrieval/AI.
+
+## Sửa/hủy đơn và nhật ký
+
+- PUT /prescriptions/by-visit/{visitId}: ADMIN/VET, body {revision,reason,notes,items}; IN_EXAM, chưa chốt hóa đơn. Áp dụng cho đơn ACTIVE hoặc kê lại đơn CANCELLED.
+- POST /prescriptions/by-visit/{visitId}/cancel: ADMIN/VET, body {revision,reason}; chưa có hóa đơn SENT/PAID. Hoàn kho một lần, giữ nguyên dòng đơn để tra cứu.
+- Response đơn có status ACTIVE/CANCELLED, revision, cancelledAt, cancelReason. Revision cũ trả 409; frontend phải tải lại trước khi lưu tiếp.
+- GET /admin/audit: ADMIN, page=0, size=20 (1–100), action, entityType, entityId, q (tài khoản). Response {content,total,pages,page}. Có beforeState/afterState; không có endpoint sửa/xóa.
+- Các action: MEDICAL_RECORD_UPDATED, PRESCRIPTION_CREATED, PRESCRIPTION_UPDATED, PRESCRIPTION_CANCELLED, INVOICE_FINALIZED, PAYMENT_RECORDED.

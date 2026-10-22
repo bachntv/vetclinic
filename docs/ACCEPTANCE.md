@@ -29,7 +29,7 @@ docker compose up -d
 .\mvnw.cmd spring-boot:run
 ```
 
-Script backup trước khi chạy SQL 002 rồi 003, kiểm tra archive/sha256, giữ số bản ghi của 12 bảng cũ, kiểm tra 4 bảng bổ sung và 5 cột mới. Các migration dùng IF NOT EXISTS, có thể chạy lại sau bản 002. Mỗi migration có transaction riêng; nếu 003 lỗi, không khẳng định cả hai đã rollback. Giữ nguyên backup để điều tra, không xóa volume.
+Script backup trước khi chạy SQL 002, 003 rồi 004, kiểm tra archive/sha256, giữ số bản ghi của 12 bảng cũ, kiểm tra 5 bảng bổ sung và 5 cột mới. Các migration dùng IF NOT EXISTS, có thể chạy lại sau bản 002. Mỗi migration có transaction riêng; nếu 003 lỗi, không khẳng định cả hai đã rollback. Giữ nguyên backup để điều tra, không xóa volume.
 
 3. PowerShell thứ hai:
 
@@ -80,3 +80,4 @@ Ngày / vai trò / tác vụ / kết quả mong đợi / thực tế / ảnh ho�
 Cần địa chỉ máy chủ/tên miền và quyền triển khai thực tế. Build frontend bằng npm.cmd run build; phục vụ dist với SPA fallback, reverse proxy /api tới backend; Vite proxy chỉ dành phát triển. Dùng HTTPS, JWT_SECRET riêng (không đặt trong biến VITE), cấu hình PostgreSQL riêng, backup có lịch và thử restore. Không dùng secret mặc định của local ngoài Internet. Chưa triển khai production trong đợt này.
 
 Đã tích hợp trợ lý trích hồ sơ có nguồn và Ollama embeddings/LLM tùy cấu hình; mô hình thật chưa được chạy/đánh giá. Các nghiệp vụ thương mại ngoài phạm vi báo cáo như SMS, ngân hàng, PetShop/spa, kéo-thả lịch, hoàn tồn do hủy đơn chưa được bổ sung trong đợt đối chiếu này.
+

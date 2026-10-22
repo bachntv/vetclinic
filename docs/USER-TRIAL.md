@@ -23,3 +23,12 @@ Ghi lỗi: bước tái hiện, dữ liệu giả lập, kết quả mong đợi
 Kết luận nghiệm thu: __________
 
 Chữ ký/xác nhận của người dùng: __________
+
+## Mời dùng thử nghĩa là gì?
+
+Nhờ bạn học hoặc người quen thao tác trên dữ liệu giả lập khoảng 15–20 phút và góp ý. Nếu có thể, nhờ người hiểu công việc phòng khám đánh giá nghiệp vụ. Người phát triển chuẩn bị tài khoản và hướng dẫn; không công bố mật khẩu hoặc hồ sơ thật.
+
+Lời mời mẫu để chủ đồ án tự gửi:
+“Bạn giúp mình thử đồ án VetClinic khoảng 15–20 phút nhé. Bạn sẽ đặt lịch, tiếp nhận, khám giả lập, kê/sửa/hủy đơn và xem thanh toán theo tài khoản mình cấp. Nhờ bạn ghi lại chỗ khó hiểu, lỗi và điều bạn muốn cải thiện. Đây là dữ liệu thử; không dùng để điều trị thực tế.”
+
+Bổ sung kịch bản sửa lượng thuốc, thử vượt tồn, hủy với lý do, kiểm tra tồn trả lại và ADMIN đối chiếu nhật ký. Sau buổi thử ghi ngày, phiên bản, người thử đồng ý được ghi tên, kết quả từng bước và mức dễ dùng 1–5. Ghi lỗi đã sửa rồi nhờ kiểm tra lại; chỉ đưa nhận xét thực nhận vào báo cáo. Chưa gửi lời mời và chưa có phản hồi thực tế.

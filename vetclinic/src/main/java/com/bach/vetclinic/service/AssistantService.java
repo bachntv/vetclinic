@@ -41,6 +41,7 @@ public class AssistantService {
                     "/visits/"+v.getId(),v.getUpdatedAt());
         }
         for(var p:prescriptions.findAllByVisitPetIdOrderByCreatedAtDesc(petId)) {
+            if(!p.getStatus().equals("ACTIVE")) continue;
             var lines=new StringBuilder("Đơn đã ghi nhận, không phải chỉ định mới. ");
             for(var i:p.getItems()) lines.append(i.getMedicine().getName()).append(": ").append(i.getDosage())
                     .append(", ").append(i.getFrequency()).append(", ").append(i.getDurationDays()).append(" ngày. ");
@@ -86,3 +87,4 @@ public class AssistantService {
         return query.stream().filter(document::contains).count()/(double)query.size();
     }
 }
+

@@ -46,6 +46,16 @@ public class PrescriptionController {
 
     private static String clean(String value) { return value == null || value.isBlank() ? null : value.trim(); }
 
+    @PutMapping("/by-visit/{visitId}")
+    public PrescriptionResponse replace(@PathVariable Long visitId,@Valid @RequestBody ReplaceRequest r){
+        var lines=r.items().stream().map(i->new PrescriptionService.ItemData(i.medicineId(),i.dosage().trim(),i.frequency().trim(),i.durationDays(),i.quantity(),clean(i.instructions()))).toList();
+        return PrescriptionResponse.from(prescriptionService.replace(visitId,r.revision(),r.reason(),r.notes(),lines));
+    }
+    @PostMapping("/by-visit/{visitId}/cancel")
+    public PrescriptionResponse cancel(@PathVariable Long visitId,@Valid @RequestBody CancelRequest r){return PrescriptionResponse.from(prescriptionService.cancel(visitId,r.revision(),r.reason()));}
+    public record ReplaceRequest(@NotNull @jakarta.validation.constraints.Min(0) Long revision,@NotBlank @Size(max=1000) String reason,@Size(max=2000) String notes,@NotEmpty List<@NotNull @Valid PrescriptionItemRequest> items){}
+    public record CancelRequest(@NotNull @jakarta.validation.constraints.Min(0) Long revision,@NotBlank @Size(max=1000) String reason){}
+
     public record PrescriptionRequest(@NotNull @Positive Long visitId,
                                       @Size(max = 2000) String notes,
                                       @NotEmpty List<@NotNull @Valid PrescriptionItemRequest> items) {}
@@ -58,11 +68,11 @@ public class PrescriptionController {
                                           @Size(max = 500) String instructions) {}
 
     public record PrescriptionResponse(Long id, Long visitId, String petName, String notes,
-                                       List<PrescriptionItemResponse> items,java.time.LocalDateTime prescribedAt) {
+                                       List<PrescriptionItemResponse> items,java.time.LocalDateTime prescribedAt,String status,long revision,java.time.LocalDateTime cancelledAt,String cancelReason) {
         static PrescriptionResponse from(Prescription prescription) {
             return new PrescriptionResponse(prescription.getId(), prescription.getVisit().getId(),
                     prescription.getVisit().getPet().getName(), prescription.getNotes(),
-                    prescription.getItems().stream().map(PrescriptionItemResponse::from).toList(),prescription.getCreatedAt());
+                    prescription.getItems().stream().map(PrescriptionItemResponse::from).toList(),prescription.getCreatedAt(),prescription.getStatus(),prescription.getRevision(),prescription.getCancelledAt(),prescription.getCancelReason());
         }
     }
 

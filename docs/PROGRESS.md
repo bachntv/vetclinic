@@ -23,7 +23,7 @@ Backend và frontend đã chạy bằng PostgreSQL trên máy người dùng; đ
 
 | Nhóm | Kết quả gần nhất |
 |---|---|
-| Backend | 31/31 đạt trên PostgreSQL 17.11, không bỏ qua bài kiểm thử |
+| Backend | 36/36 đạt trên PostgreSQL 17.11, không bỏ qua bài kiểm thử |
 | Frontend API | 8/8 đạt |
 | TypeScript và production build | Đạt |
 | HTTP qua frontend build tới backend PostgreSQL kiểm thử | 13/13 đạt |
@@ -54,4 +54,9 @@ Chuẩn bị phiên bản theo dõi trên GitHub: mã nguồn, tài liệu tiế
 ### PostgreSQL — 22/10/2026
 
 Docker đã hoạt động. Đã sao lưu, chạy migration 002/003 và giữ nguyên số bản ghi của 12 bảng gốc; khôi phục backup vào database riêng thành công. Ứng dụng chính dùng PostgreSQL database vetclinic, backend 8080 và frontend build 5173. Dữ liệu kiểm thử HTTP/đồng thời được tách sang database riêng. Sau restart, hồ sơ, tồn kho và hóa đơn đã thanh toán vẫn đúng. Có script khởi động/dừng và hướng dẫn tại [POSTGRES-RUN.md](POSTGRES-RUN.md).
+
+
+## Hoàn thiện nghiệp vụ đơn thuốc và nhật ký — 22/10/2026
+
+Đã sửa/hủy/kê lại đơn và hoàn kho có kiểm soát đồng thời, thêm nhật ký ADMIN, cải thiện xác nhận thanh toán và phân trang/giao diện hẹp. Đã thử luồng phối hợp lễ tân–bác sĩ–lễ tân và quản trị nhật ký bằng trình duyệt trên database riêng. Xem [phạm vi, kết quả và giới hạn](LIFECYCLE-VALIDATION.md). Chưa có phản hồi người dùng độc lập.
 

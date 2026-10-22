@@ -28,6 +28,8 @@ export function Field({name,label,type='text',required=false,value,options,maxLe
 }
 export function Table<T extends {id?:number|string}>({rows,columns,empty='Chưa có dữ liệu.',paginate=true}:{rows:T[];columns:Column<T>[];empty?:string;paginate?:boolean}){
   const[page,setPage]=useState(0);const size=10,maxPage=Math.max(0,Math.ceil(rows.length/size)-1),safePage=Math.min(page,maxPage);
+  const identity=rows.map((r,i)=>r.id??i).join(',');
+  useEffect(()=>setPage(0),[identity]);
   return rows.length?<><div className="table-wrap"><table><thead><tr>{columns.map(c=><th key={c.label}>{c.label}</th>)}</tr></thead><tbody>{(paginate?rows.slice(safePage*size,(safePage+1)*size):rows).map((r,i)=><tr key={r.id??i}>{columns.map(c=><td key={c.label}>{c.render?c.render(r):c.key?String(r[c.key]??'—'):'—'}</td>)}</tr>)}</tbody></table></div>{paginate&&<div className="pagination"><span>{rows.length} kết quả · Trang {safePage+1}/{maxPage+1}</span><button disabled={safePage===0} onClick={()=>setPage(safePage-1)}>Trước</button><button disabled={safePage===maxPage} onClick={()=>setPage(safePage+1)}>Sau</button></div>}</>:<p className="empty">{empty}</p>;
 }
 export function formValues(form:HTMLFormElement,fields:FieldSpec[]){const raw=new FormData(form),out:Record<string,string|number|null>={};for(const field of fields){let v=raw.get(field.name);if(typeof v==='string')v=v.trim();if(field.required&&!v)throw new Error(`Vui lòng nhập ${field.label}`);out[field.name]=v===null||v===''?null:field.type==='number'?Number(v):String(v);}return out;}

@@ -1,0 +1,9 @@
+{
+  "migration": "004_prescription_audit.sql",
+  "changedFiles": 28,
+  "installedAt": "2026-10-22T20:45:07.8379641+07:00",
+  "existingTableCountsPreserved": true,
+  "existingTables": 16,
+  "databaseBackupVerified": true,
+  "backupSha256": "AF33C1384F7F4B9C23D221363CA77215D524324A9BEFA54DA0BDA02F8D697E8C"
+}
