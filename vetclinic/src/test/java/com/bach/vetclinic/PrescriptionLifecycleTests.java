@@ -18,6 +18,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest @AutoConfigureMockMvc @ActiveProfiles("test")
 class PrescriptionLifecycleTests {
+ @Autowired InvoiceService invoices;
+ @Autowired org.springframework.transaction.PlatformTransactionManager transactionManager;
+ @jakarta.persistence.PersistenceContext jakarta.persistence.EntityManager entityManager;
  @Autowired MockMvc mvc;@Autowired UserService users;@Autowired OwnerService owners;@Autowired PetService pets;@Autowired VetService vets;@Autowired VisitService visits;@Autowired MedicineService medicines;@Autowired JdbcTemplate db;
  final JsonMapper json=JsonMapper.builder().build();String admin,vet,reception;long visit,medicine,rx;
  String login(UserRole role)throws Exception{String email=UUID.randomUUID()+"@qa.local";users.create("Lifecycle tester",email,"Lifecycle-password-2026",role);return json.readTree(mvc.perform(post("/api/auth/login").contentType("application/json").content(json.writeValueAsString(Map.of("email",email,"password","Lifecycle-password-2026")))).andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).get("accessToken").asText();}
@@ -32,6 +35,50 @@ class PrescriptionLifecycleTests {
  org.springframework.test.web.servlet.ResultActions replace(String token,long revision,int qty)throws Exception{return mvc.perform(put("/api/prescriptions/by-visit/"+visit).header("Authorization","Bearer "+token).contentType("application/json").content(json.writeValueAsString(Map.of("revision",revision,"reason","Correction","items",lines(qty)))));}
  org.springframework.test.web.servlet.ResultActions cancel(String token,long revision)throws Exception{return mvc.perform(post("/api/prescriptions/by-visit/"+visit+"/cancel").header("Authorization","Bearer "+token).contentType("application/json").content(json.writeValueAsString(Map.of("revision",revision,"reason","Cancelled before dispensing"))));}
  BigDecimal stock(){return db.queryForObject("select stock_quantity from medicines where id=?",BigDecimal.class,medicine);}
+ long draftInvoice(){
+  visits.changeStatus(visit,VisitStatus.COMPLETED);
+  return invoices.create(visit,BigDecimal.ZERO,List.of(new InvoiceService.ItemData("Consultation",InvoiceItemCategory.CONSULTATION,BigDecimal.ONE,new BigDecimal("123.45")))).getId();
+ }
+ @Test void paymentDateIsRecordedOnceAndRevenueUsesCollectionMonth()throws Exception{
+  long id=draftInvoice();
+  db.update("update invoices set issued_at=? where id=?",LocalDateTime.of(2001,1,1,10,0),id);
+  assertNull(invoices.findById(id).getPaidAt());
+  invoices.changeStatus(id,InvoiceStatus.SENT);
+  assertNull(invoices.findById(id).getPaidAt());
+  var before=LocalDateTime.now().minusSeconds(1);
+  invoices.changeStatus(id,InvoiceStatus.PAID);
+  var paidAt=invoices.findById(id).getPaidAt();
+  assertNotNull(paidAt);assertFalse(paidAt.isBefore(before));
+  assertThrows(com.bach.vetclinic.web.ConflictException.class,()->invoices.changeStatus(id,InvoiceStatus.PAID));
+  assertEquals(paidAt,invoices.findById(id).getPaidAt());
+  // A unique historical collection month keeps this assertion independent of other fixtures.
+  db.update("update invoices set paid_at=? where id=?",LocalDateTime.of(2002,2,3,10,0),id);
+  mvc.perform(get("/api/dashboard/summary").header("Authorization","Bearer "+admin)).andExpect(status().isOk())
+   .andExpect(jsonPath("$.revenueByMonth['2002-02-01']").value(123.45))
+   .andExpect(jsonPath("$.revenueByMonth['2001-01-01']").doesNotExist());
+ }
+ @Test void legacyPaidInvoicesRemainInTotalWithoutInventingCollectionDate()throws Exception{
+  long id=draftInvoice();
+  db.update("update invoices set status='PAID', paid_at=null where id=?",id);
+  mvc.perform(get("/api/invoices/"+id).header("Authorization","Bearer "+admin)).andExpect(status().isOk()).andExpect(jsonPath("$.paidAt").isEmpty());
+  var summary=json.readTree(mvc.perform(get("/api/dashboard/summary").header("Authorization","Bearer "+admin)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString());
+  assertTrue(summary.get("revenueWithoutPaymentDate").decimalValue().compareTo(new BigDecimal("123.45"))>=0);
+  assertTrue(summary.get("paidRevenue").decimalValue().compareTo(summary.get("revenueWithoutPaymentDate").decimalValue())>=0);
+ }
+ @Test void staleDraftCannotOverwriteConcurrentlyFinalizedInvoice(){
+  long id=draftInvoice();
+  var tx=new org.springframework.transaction.support.TransactionTemplate(transactionManager);
+  tx.executeWithoutResult(status->{
+   assertEquals(InvoiceStatus.DRAFT,entityManager.find(Invoice.class,id).getStatus());
+   try(var executor=java.util.concurrent.Executors.newSingleThreadExecutor()){
+    executor.submit(()->invoices.changeStatus(id,InvoiceStatus.SENT)).get(10,java.util.concurrent.TimeUnit.SECONDS);
+   }catch(Exception e){throw new RuntimeException(e);}
+   assertThrows(com.bach.vetclinic.web.ConflictException.class,()->invoices.updateDraftItems(id,BigDecimal.ZERO,List.of(new InvoiceService.ItemData("Stale edit",InvoiceItemCategory.OTHER,BigDecimal.ONE,BigDecimal.ONE))));
+   status.setRollbackOnly();
+  });
+  assertEquals(InvoiceStatus.SENT,invoices.findById(id).getStatus());
+  assertEquals(0,new BigDecimal("123.45").compareTo(invoices.findById(id).getTotal()));
+ }
  @Test void replaceCancelAndReissuePreserveStockAndHistory()throws Exception{
   replace(vet,0,5).andExpect(status().isOk()).andExpect(jsonPath("$.revision").value(1));assertEquals(0,stock().compareTo(new BigDecimal("5")));
   cancel(vet,1).andExpect(status().isOk()).andExpect(jsonPath("$.status").value("CANCELLED"));assertEquals(0,stock().compareTo(BigDecimal.TEN));

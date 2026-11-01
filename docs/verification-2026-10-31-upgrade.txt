@@ -1,0 +1,66 @@
+Stop the backend before running this script. Docker Desktop must be running.
+Creating PostgreSQL custom-format backup...
+Backup verified: C:\Users\bachn\vetclinic\backups\vetclinic-before-upgrade-20261031-193326.dump
+Applying transactional migration 002_staff_workspace.sql...
+BEGIN
+DO
+ALTER TABLE
+CREATE TABLE
+NOTICE:  relation "support_requests" already exists, skipping
+CREATE TABLE
+NOTICE:  relation "knowledge_documents" already exists, skipping
+CREATE INDEX
+NOTICE:  relation "idx_visits_vet_schedule" already exists, skipping
+CREATE INDEX
+NOTICE:  relation "idx_support_requester" already exists, skipping
+CREATE INDEX
+NOTICE:  relation "idx_vaccinations_due" already exists, skipping
+COMMIT
+Applying transactional migration 003_report_alignment.sql...
+BEGIN
+NOTICE:  column "symptoms" of relation "visits" already exists, skipping
+ALTER TABLE
+ALTER TABLE
+NOTICE:  column "description" of relation "medicines" already exists, skipping
+ALTER TABLE
+CREATE TABLE
+NOTICE:  column "notes" of relation "vaccinations" already exists, skipping
+NOTICE:  relation "vaccine_types" already exists, skipping
+CREATE TABLE
+NOTICE:  relation "revoked_tokens" already exists, skipping
+CREATE INDEX
+NOTICE:  relation "idx_revoked_token_expiry" already exists, skipping
+ALTER TABLE
+NOTICE:  column "vet_id" of relation "users" already exists, skipping
+ALTER TABLE
+NOTICE:  column "vaccine_id" of relation "vaccinations" already exists, skipping
+DO
+NOTICE:  relation "uk_users_vet" already exists, skipping
+CREATE INDEX
+INSERT 0 0
+UPDATE 0
+COMMIT
+Applying transactional migration 004_prescription_audit.sql...
+BEGIN
+ALTER TABLE
+NOTICE:  column "status" of relation "prescriptions" already exists, skipping
+ALTER TABLE
+NOTICE:  column "revision" of relation "prescriptions" already exists, skipping
+NOTICE:  column "cancelled_at" of relation "prescriptions" already exists, skipping
+NOTICE:  column "cancel_reason" of relation "prescriptions" already exists, skipping
+ALTER TABLE
+ALTER TABLE
+DO
+CREATE TABLE
+NOTICE:  relation "audit_events" already exists, skipping
+CREATE INDEX
+NOTICE:  relation "idx_audit_occurred" already exists, skipping
+NOTICE:  relation "idx_audit_entity" already exists, skipping
+CREATE INDEX
+COMMIT
+Applying transactional migration 005_invoice_paid_at.sql...
+BEGIN
+ALTER TABLE
+COMMIT
+SUCCESS: schema upgraded; counts of all 12 original tables unchanged.
+Restart backend, then sign out/in on the frontend. Existing email/password stays unchanged.

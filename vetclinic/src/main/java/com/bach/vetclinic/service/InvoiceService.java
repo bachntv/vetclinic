@@ -48,7 +48,7 @@ public class InvoiceService {
     }
 
     public Invoice updateDraftItems(Long id, BigDecimal vatRate, List<ItemData> items) {
-        Invoice invoice = findById(id);
+        Invoice invoice = lockForChange(id);
         requireDraft(invoice);
         invoice.setVatRate(normalizeVatRate(vatRate));
         invoice.replaceItems(toEntities(invoice, items));
@@ -57,9 +57,7 @@ public class InvoiceService {
     }
 
     public Invoice changeStatus(Long id, InvoiceStatus nextStatus) {
-        Invoice invoice = findById(id);
-        var lockedVisit=visitRepository.findWithDetailsByIdForUpdate(invoice.getVisit().getId()).orElseThrow();
-        entityManager.refresh(invoice);entityManager.refresh(lockedVisit);
+        Invoice invoice = lockForChange(id);
         var previous=invoice.getStatus().name();
         if (nextStatus == InvoiceStatus.SENT) {
             requireDraft(invoice);
@@ -77,7 +75,17 @@ public class InvoiceService {
             throw new ConflictException("Không thể chuyển hóa đơn trở lại trạng thái nháp");
         }
         invoice.setStatus(nextStatus);
+        if (nextStatus == InvoiceStatus.PAID) invoice.setPaidAt(LocalDateTime.now());
         audit.record(nextStatus==InvoiceStatus.PAID?"PAYMENT_RECORDED":"INVOICE_FINALIZED","INVOICE",id,null,java.util.Map.of("status",previous),java.util.Map.of("status",nextStatus.name(),"total",invoice.getTotal()));
+        return invoice;
+    }
+
+    private Invoice lockForChange(Long id) {
+        Invoice invoice = findById(id);
+        // Use the same visit lock as prescription changes and invoice finalization.
+        var lockedVisit = visitRepository.findWithDetailsByIdForUpdate(invoice.getVisit().getId()).orElseThrow();
+        entityManager.refresh(invoice);
+        entityManager.refresh(lockedVisit);
         return invoice;
     }
 

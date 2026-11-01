@@ -27,6 +27,9 @@ public class Invoice extends BaseEntity {
     @Column(name = "issued_at", nullable = false)
     private LocalDateTime issuedAt;
 
+    @Column(name = "paid_at")
+    private LocalDateTime paidAt;
+
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal subtotal;
 
@@ -60,6 +63,8 @@ public class Invoice extends BaseEntity {
 
     public Visit getVisit() { return visit; }
     public LocalDateTime getIssuedAt() { return issuedAt; }
+    public LocalDateTime getPaidAt() { return paidAt; }
+    public void setPaidAt(LocalDateTime paidAt) { this.paidAt = paidAt; }
     public BigDecimal getSubtotal() { return subtotal; }
     public BigDecimal getVatRate() { return vatRate; }
     public BigDecimal getVatAmount() { return vatAmount; }

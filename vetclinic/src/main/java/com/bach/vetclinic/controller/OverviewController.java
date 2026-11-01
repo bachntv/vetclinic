@@ -35,8 +35,9 @@ public class OverviewController {
         result.put("inactivePatientCount",pets.findAllByArchivedFalseOrderByNameAsc().stream().filter(p->!recentPets.contains(p.getId())).count());
         result.put("todaySchedule",allVisits.stream().filter(v->v.getScheduledAt().toLocalDate().equals(today) && v.getStatus()!=VisitStatus.CANCELLED).map(AppointmentController.AppointmentResponse::from).toList());
         result.put("paidRevenue",allInvoices.stream().filter(i->i.getStatus()==InvoiceStatus.PAID).map(Invoice::getTotal).reduce(BigDecimal.ZERO,BigDecimal::add));
+        result.put("revenueWithoutPaymentDate",allInvoices.stream().filter(i->i.getStatus()==InvoiceStatus.PAID && i.getPaidAt()==null).map(Invoice::getTotal).reduce(BigDecimal.ZERO,BigDecimal::add));
         result.put("unpaidCount",allInvoices.stream().filter(i->i.getStatus()==InvoiceStatus.SENT).count());
-        result.put("revenueByMonth",allInvoices.stream().filter(i->i.getStatus()==InvoiceStatus.PAID).collect(Collectors.groupingBy(i->i.getIssuedAt().toLocalDate().withDayOfMonth(1).toString(),TreeMap::new,Collectors.reducing(BigDecimal.ZERO,Invoice::getTotal,BigDecimal::add))));
+        result.put("revenueByMonth",allInvoices.stream().filter(i->i.getStatus()==InvoiceStatus.PAID && i.getPaidAt()!=null).collect(Collectors.groupingBy(i->i.getPaidAt().toLocalDate().withDayOfMonth(1).toString(),TreeMap::new,Collectors.reducing(BigDecimal.ZERO,Invoice::getTotal,BigDecimal::add))));
         result.put("vetWorkload",allVisits.stream().filter(v->v.getStatus()!=VisitStatus.CANCELLED).collect(Collectors.groupingBy(v->v.getVet().getName()+" (#"+v.getVet().getId()+")",Collectors.counting())));
         result.put("appointmentTrend",allVisits.stream().filter(v->v.getStatus()!=VisitStatus.CANCELLED).collect(Collectors.groupingBy(v->v.getScheduledAt().toLocalDate().withDayOfMonth(1).toString(),TreeMap::new,Collectors.counting())));
         result.put("vaccinationAlerts",allVaccines.stream().filter(v->v.getNextDueDate()!=null && !v.getNextDueDate().isAfter(today.plusDays(30))).map(VaccinationController.VaccinationResponse::from).toList());

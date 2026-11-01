@@ -6,7 +6,7 @@ export interface Column<T> {label:string;key?:keyof T;render?:(row:T)=>ReactNode
 export interface Resource<T> {data:T|null;error:string;loading:boolean;status?:number;reload:()=>void}
 export const scalar=(value:unknown):string|number|undefined=>typeof value==='string'||typeof value==='number'?value:undefined;
 interface Action {busy:boolean;error:string;success:string;run:(fn:()=>Promise<unknown>,message?:string)=>Promise<boolean>}
-export const labels:Record<string,string> = {ADMIN:'Quản trị viên',VET:'Bác sĩ',RECEPTIONIST:'Lễ tân',SCHEDULED:'Đã đặt lịch',CHECKED_IN:'Đã tiếp nhận',IN_EXAM:'Đang khám',COMPLETED:'Hoàn thành',CANCELLED:'Đã hủy',DRAFT:'Nháp',SENT:'Chờ thanh toán',PAID:'Đã thanh toán',OPEN:'Mới',IN_PROGRESS:'Đang xử lý',RESOLVED:'Đã giải quyết',CONSULTATION:'Khám',VACCINATION:'Tiêm chủng',SURGERY:'Phẫu thuật',HOSPITAL:'Lưu viện',MEDICATION:'Thuốc',OTHER:'Khác'};
+export const labels:Record<string,string> = {ADMIN:'Quản trị viên',VET:'Bác sĩ',RECEPTIONIST:'Thu ngân / tiếp nhận',SCHEDULED:'Đã đặt lịch',CHECKED_IN:'Đã tiếp nhận',IN_EXAM:'Đang khám',COMPLETED:'Hoàn thành',CANCELLED:'Đã hủy',DRAFT:'Nháp',SENT:'Chờ thanh toán',PAID:'Đã thanh toán',OPEN:'Mới',IN_PROGRESS:'Đang xử lý',RESOLVED:'Đã giải quyết',CONSULTATION:'Khám',VACCINATION:'Tiêm chủng',SURGERY:'Phẫu thuật',HOSPITAL:'Lưu viện',MEDICATION:'Thuốc',OTHER:'Khác'};
 export const money = (n:number|null|undefined) => new Intl.NumberFormat('vi-VN',{style:'currency',currency:'VND'}).format(n || 0);
 export const dateTime = (value:string|null|undefined) => value ? new Date(value).toLocaleString('vi-VN') : '—';
 export const localDate = () => {const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};

@@ -60,7 +60,11 @@ Sau đó chạy lại backend và đăng nhập lại (JWT cũ không có creden
 - Tài khoản: ADMIN cấp tài khoản ADMIN/VET/RECEPTIONIST, khóa/mở, đặt lại mật khẩu. Không đăng ký công khai.
 - Tìm kiếm chủ nuôi/thú cưng/lượt khám; hỗ trợ nội bộ; kho tài liệu có nguồn cho giai đoạn AI/RAG.
 
-## Quyền
+## Giao diện theo vai trò
+
+Đã tách ba không gian làm việc: quản trị, bác sĩ và thu ngân/tiếp nhận. Mỗi vai trò có trang chủ, menu, lối tắt và thao tác riêng; chặn URL ngoài phạm vi. Xem [ma trận chức năng và kiểm chứng](docs/UI-ROLES.md). Bảng quyền API dưới đây mô tả backend; phạm vi giao diện được tổ chức hẹp hơn theo công việc.
+
+## Quyền API
 
 | Nhóm | ADMIN | VET | RECEPTIONIST |
 |---|---|---|---|
@@ -87,14 +91,14 @@ npm.cmd run build
 npm.cmd test
 ```
 
-Mặc định test dùng H2. Chạy ``.\scripts\test-postgres.ps1`` từ thư mục gốc để dùng các database PostgreSQL mới, tách biệt dữ liệu vận hành. Đã đạt 31/31 bài trên PostgreSQL: quyền từng vai trò, luồng khám/kê đơn/thanh toán, chặn trùng lịch, khóa/đổi mật khẩu vô hiệu token, cân nặng lịch sử, riêng tư hỗ trợ và khôi phục thú cưng. Mockito dùng Java agent qua Surefire để tương thích sandbox Windows.
+Mặc định test dùng H2. Chạy ``.\scripts\test-postgres.ps1`` từ thư mục gốc để dùng các database PostgreSQL mới, tách biệt dữ liệu vận hành. Đã đạt 39/39 bài trên PostgreSQL (31/10/2026): quyền từng vai trò, luồng khám/kê đơn/thanh toán, chặn trùng lịch, khóa/đổi mật khẩu vô hiệu token, cân nặng lịch sử, riêng tư hỗ trợ và khôi phục thú cưng. Mockito dùng Java agent qua Surefire để tương thích sandbox Windows.
 
 ## Giới hạn cần biết
 
 - Giao diện được viết lại bằng tiếng Việt; không phải bản sao pixel của mẫu. Có lịch tháng, chưa có kéo-thả đổi lịch và lưới tuần theo giờ.
 - Chủ nuôi/thú cưng có tìm kiếm/phân trang backend. Danh sách các màn hình mở rộng phân trang phía client; API cũ vẫn trả arrays. Dashboard/search hiện tổng hợp trong bộ nhớ, cần chuyển sang truy vấn aggregate/page khi dữ liệu lớn.
-- Doanh thu nhóm theo tháng lập hóa đơn đã thanh toán, chưa lưu giao dịch/thời điểm thu tiền riêng. Đánh dấu PAID không phải cổng thanh toán.
-- Chưa có SMTP/SMS, file đính kèm, kiểm tra tương tác thuốc, refresh token, chỉnh/hủy đơn thuốc và hoàn tồn kho.
+- Doanh thu nhóm theo tháng xác nhận thu tiền; hóa đơn PAID cũ thiếu ngày thu được tính trong tổng và hiển thị riêng, không tự gán tháng. Đánh dấu PAID không phải cổng thanh toán.
+- Chưa có SMTP/SMS, file đính kèm, kiểm tra tương tác thuốc, refresh token. Đã có sửa/hủy/kê lại đơn và hoàn kho có kiểm soát.
 - Đã có trợ lý bệnh án: trích hồ sơ có nguồn và tích hợp Ollama embeddings/LLM tùy cấu hình. Chưa kiểm chứng chất lượng mô hình thật hoặc dùng pgvector. Xem `docs/AI-RAG.md`.
 - Đã kiểm chứng PostgreSQL, migration thủ công và backup/restore cục bộ. Trước triển khai Internet vẫn cần HTTPS/reverse proxy, migration tự động, giám sát và chính sách backup. Không đưa secret backend vào biến VITE.
 

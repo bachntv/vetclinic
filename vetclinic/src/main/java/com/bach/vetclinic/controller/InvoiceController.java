@@ -76,12 +76,12 @@ public class InvoiceController {
     public record StatusRequest(@NotNull InvoiceStatus status) {}
 
     public record InvoiceResponse(Long id, Long visitId, Long petId, String petName,
-                                  LocalDateTime issuedAt, BigDecimal subtotal, BigDecimal vatRate,
+                                  LocalDateTime issuedAt, LocalDateTime paidAt, BigDecimal subtotal, BigDecimal vatRate,
                                   BigDecimal vatAmount, BigDecimal total, InvoiceStatus status,
                                   List<InvoiceItemResponse> items) {
         static InvoiceResponse from(Invoice invoice) {
             return new InvoiceResponse(invoice.getId(), invoice.getVisit().getId(), invoice.getVisit().getPet().getId(),
-                    invoice.getVisit().getPet().getName(), invoice.getIssuedAt(), invoice.getSubtotal(),
+                    invoice.getVisit().getPet().getName(), invoice.getIssuedAt(), invoice.getPaidAt(), invoice.getSubtotal(),
                     invoice.getVatRate(), invoice.getVatAmount(), invoice.getTotal(), invoice.getStatus(),
                     invoice.getItems().stream().map(InvoiceItemResponse::from).toList());
         }

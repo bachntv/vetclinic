@@ -1,0 +1,101 @@
+{
+  "completedDate": "2026-11-02",
+  "environment": "isolated in-memory H2, backend 18082, frontend build 5174",
+  "checks": [
+    {
+      "role": "RECEPTIONIST",
+      "page": "visit",
+      "medicalForm": 0,
+      "startExam": 0,
+      "invoiceLink": 1
+    },
+    {
+      "role": "RECEPTIONIST",
+      "page": "direct /medicines",
+      "denied": true
+    },
+    {
+      "role": "RECEPTIONIST",
+      "page": "patient",
+      "medicalHistory": 0,
+      "prescriptions": 0
+    },
+    {
+      "role": "VET",
+      "page": "dashboard",
+      "invoiceMenu": 0,
+      "accountsMenu": 0,
+      "clinicalDashboard": true
+    },
+    {
+      "role": "VET",
+      "page": "appointments",
+      "newAppointment": 0,
+      "walkIn": 0
+    },
+    {
+      "role": "VET",
+      "page": "visit",
+      "startExam": "PASS",
+      "saveDiagnosis": "PASS",
+      "prescriptionAction": true,
+      "invoiceLink": 0
+    },
+    {
+      "role": "VET",
+      "page": "direct /invoices",
+      "denied": true
+    },
+    {
+      "role": "VET",
+      "page": "medicines",
+      "create": 0,
+      "edit": 0,
+      "actionColumn": 0
+    },
+    {
+      "role": "VET",
+      "page": "direct /pets/1/edit",
+      "denied": true
+    },
+    {
+      "role": "ADMIN",
+      "page": "dashboard",
+      "accountsMenu": 1,
+      "auditMenu": 1,
+      "financeMenu": 1
+    },
+    {
+      "role": "ADMIN",
+      "page": "medicines",
+      "create": true,
+      "edit": true
+    },
+    {
+      "role": "ADMIN",
+      "page": "users",
+      "accountList": true,
+      "roleLabels": true
+    },
+    {
+      "role": "RECEPTIONIST",
+      "page": "login after ADMIN /users",
+      "redirect": "/dashboard",
+      "noAdminMenu": true
+    },
+    {
+      "role": "RECEPTIONIST",
+      "page": "patient edit",
+      "clinicalFields": 0,
+      "ownerSelectionPreserved": true,
+      "saveBasicInfo": "PASS"
+    },
+    {
+      "role": "VET",
+      "page": "patient after reception edit",
+      "allergyPreserved": true,
+      "chronicConditionPreserved": true,
+      "profileEditButton": 0
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+Migration 005 applied twice; legacy row and total preserved; paid_at remains NULL. Database: vetclinic_migration_20261031_193208

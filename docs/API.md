@@ -87,7 +87,7 @@ Invoice: `{visitId,vatRate,items:[{description,category,quantity,unitPrice}]}`. 
 
 | Method | Path | Chức năng |
 |---|---|---|
-| GET | /dashboard/summary | Counts, lịch hôm nay, doanh thu PAID theo tháng lập, tải bác sĩ, cảnh báo tiêm/tái khám/tồn kho |
+| GET | /dashboard/summary | Counts, lịch hôm nay, doanh thu PAID theo tháng thu tiền, tải bác sĩ, cảnh báo tiêm/tái khám/tồn kho |
 | GET | /notifications | Lịch 7 ngày, tiêm đến/quá hạn, tái khám 30 ngày, thuốc sắp hết |
 | GET | /search?q= | Tối thiểu 2 ký tự; tối đa 50 kết quả mỗi loại owners/pets/visits |
 | GET / POST | /support-requests | Gửi `{subject,description}`; nhân viên xem của mình, ADMIN xem hết |
@@ -104,3 +104,11 @@ Các API tổng hợp/search hiện đọc danh sách trong bộ nhớ; cần ag
 - Response đơn có status ACTIVE/CANCELLED, revision, cancelledAt, cancelReason. Revision cũ trả 409; frontend phải tải lại trước khi lưu tiếp.
 - GET /admin/audit: ADMIN, page=0, size=20 (1–100), action, entityType, entityId, q (tài khoản). Response {content,total,pages,page}. Có beforeState/afterState; không có endpoint sửa/xóa.
 - Các action: MEDICAL_RECORD_UPDATED, PRESCRIPTION_CREATED, PRESCRIPTION_UPDATED, PRESCRIPTION_CANCELLED, INVOICE_FINALIZED, PAYMENT_RECORDED.
+
+## Ngày thu tiền — 31/10/2026
+
+Response hóa đơn bổ sung `paidAt` (ngày giờ cục bộ của máy chủ, cùng quy ước với `issuedAt`), null khi chưa thu hoặc hóa đơn PAID cũ chưa rõ thời điểm. Backend tự lưu khi SENT → PAID; client không được gửi ngày thu tùy ý. Xác nhận lại PAID trả 409 và giữ nguyên thời điểm đã ghi.
+
+`revenueByMonth` nhóm theo `paidAt`; `paidRevenue` vẫn gồm mọi hóa đơn PAID. `revenueWithoutPaymentDate` là tổng PAID thiếu ngày thu, được trình bày riêng và không gán vào tháng lập. Sửa nháp và chuyển trạng thái dùng chung khóa lượt khám, đọc lại trạng thái sau khi khóa để chặn ghi từ màn hình cũ khi hóa đơn đã chốt.
+
+Database hiện có cần migration `005_invoice_paid_at.sql`, đã thêm vào script nâng cấp có backup. Migration chỉ thêm cột nullable, không suy đoán ngày thu của dữ liệu lịch sử.

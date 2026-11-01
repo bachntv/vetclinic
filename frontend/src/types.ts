@@ -17,11 +17,11 @@ export interface Weight {id:number;petId:number;weightKg:number;recordedAt:strin
 export interface PrescriptionItem {id:number;medicineId:number;medicineName:string;unit:string;dosage:string;frequency:string;durationDays:number;quantity:number;unitPrice:number;instructions:string|null}
 export interface Prescription {id:number;visitId:number;petName:string;notes:string|null;items:PrescriptionItem[];prescribedAt:string;status:'ACTIVE'|'CANCELLED';revision:number;cancelledAt:string|null;cancelReason:string|null}
 export interface InvoiceItem {id:number;description:string;category:InvoiceCategory;quantity:number;unitPrice:number;lineTotal:number}
-export interface Invoice {id:number;visitId:number;petId:number;petName:string;issuedAt:string;subtotal:number;vatRate:number;vatAmount:number;total:number;status:InvoiceStatus;items:InvoiceItem[]}
+export interface Invoice {id:number;visitId:number;petId:number;petName:string;issuedAt:string;paidAt:string|null;subtotal:number;vatRate:number;vatAmount:number;total:number;status:InvoiceStatus;items:InvoiceItem[]}
 export interface Page<T> {content:T[];total:number;pages:number;page:number}
 export interface SupportRequest extends Base {requestedBy:string;subject:string;description:string;status:'OPEN'|'IN_PROGRESS'|'RESOLVED'}
 export interface KnowledgeDocument extends Base {title:string;content:string;source:string|null}
-export interface Summary {ownerCount:number;petCount:number;inactivePatientCount:number;todaySchedule:Visit[];paidRevenue:number;unpaidCount:number;revenueByMonth:Record<string,number>;vetWorkload:Record<string,number>;appointmentTrend:Record<string,number>;vaccinationAlerts:Vaccination[];followUps:Visit[];lowStock:Medicine[]}
+export interface Summary {ownerCount:number;petCount:number;inactivePatientCount:number;todaySchedule:Visit[];paidRevenue:number;revenueWithoutPaymentDate:number;unpaidCount:number;revenueByMonth:Record<string,number>;vetWorkload:Record<string,number>;appointmentTrend:Record<string,number>;vaccinationAlerts:Vaccination[];followUps:Visit[];lowStock:Medicine[]}
 export interface Performance {visitCount:number;completed:number;paidRevenue:number}
 export interface SearchRow {id:number;name?:string;petName?:string;firstName?:string;lastName?:string;phone?:string|null;ownerName?:string;diagnosis?:string|null;email?:string|null}
 export type SearchResults=Record<'owners'|'pets'|'visits',SearchRow[]>;

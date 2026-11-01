@@ -5,7 +5,7 @@ $backupDirectory = Join-Path $projectPath 'backups'
 $backupName = 'vetclinic-before-upgrade-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '.dump'
 $containerBackup = '/tmp/' + $backupName
 $localBackup = Join-Path $backupDirectory $backupName
-$migrations = @('002_staff_workspace.sql', '003_report_alignment.sql', '004_prescription_audit.sql')
+$migrations = @('002_staff_workspace.sql', '003_report_alignment.sql', '004_prescription_audit.sql', '005_invoice_paid_at.sql')
 
 function Assert-DockerSuccess([string]$step) {
     if ($LASTEXITCODE -ne 0) { throw "Docker failed: $step. Migration has not completed. Keep the backup and review the error." }
@@ -50,9 +50,9 @@ try {
     $tables = & docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U postgres -d vetclinic -At -c "SELECT tablename FROM pg_tables WHERE schemaname='public' AND tablename IN ('support_requests','knowledge_documents','vaccine_types','revoked_tokens','audit_events') ORDER BY tablename;"
     Assert-DockerSuccess 'verify added tables'
     if (($tables -join ',') -ne 'audit_events,knowledge_documents,revoked_tokens,support_requests,vaccine_types') { throw 'Missing expected tables after migration.' }
-    $columns = & docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U postgres -d vetclinic -At -c "SELECT count(*) FROM information_schema.columns WHERE table_schema='public' AND (table_name,column_name) IN (('visits','symptoms'),('medicines','description'),('vaccinations','notes'),('vaccinations','vaccine_id'),('users','vet_id'));"
+    $columns = & docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U postgres -d vetclinic -At -c "SELECT count(*) FROM information_schema.columns WHERE table_schema='public' AND (table_name,column_name) IN (('visits','symptoms'),('medicines','description'),('vaccinations','notes'),('vaccinations','vaccine_id'),('users','vet_id'),('invoices','paid_at'));"
     Assert-DockerSuccess 'verify added columns'
-    if (($columns -join '').Trim() -ne '5') { throw 'Missing expected columns after migration.' }
+    if (($columns -join '').Trim() -ne '6') { throw 'Missing expected columns after migration.' }
     Write-Host 'SUCCESS: schema upgraded; counts of all 12 original tables unchanged.'
     Write-Host 'Restart backend, then sign out/in on the frontend. Existing email/password stays unchanged.'
 }

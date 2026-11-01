@@ -1,0 +1,11 @@
+{
+  "login": "PASS",
+  "health": "UP",
+  "invoicePaymentDateFields": "PASS",
+  "petCount": 2,
+  "dashboardPaymentDateField": "PASS",
+  "date": "2026-10-31",
+  "frontendStatus": 200,
+  "invoiceCount": 1,
+  "ownerCount": 2
+}
