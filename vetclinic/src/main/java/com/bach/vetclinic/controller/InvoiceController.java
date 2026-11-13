@@ -38,6 +38,12 @@ public class InvoiceController {
     @GetMapping("/{id}")
     public InvoiceResponse get(@PathVariable Long id) { return InvoiceResponse.from(invoiceService.findById(id)); }
 
+    @GetMapping("/visits/{visitId}/prescribed-charges")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONIST')")
+    public List<InvoiceService.PrescribedCharge> prescribedCharges(@PathVariable Long visitId) {
+        return invoiceService.prescribedCharges(visitId);
+    }
+
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONIST')")
     @ResponseStatus(HttpStatus.CREATED)

@@ -2,6 +2,7 @@ package com.bach.vetclinic.service;
 
 import com.bach.vetclinic.entity.*;
 import com.bach.vetclinic.repository.InvoiceRepository;
+import com.bach.vetclinic.repository.PrescriptionRepository;
 import com.bach.vetclinic.repository.VisitRepository;
 import com.bach.vetclinic.web.ConflictException;
 import com.bach.vetclinic.web.NotFoundException;
@@ -19,11 +20,14 @@ public class InvoiceService {
     private final InvoiceRepository invoiceRepository;
     private final VisitRepository visitRepository;
     private final AuditService audit;
+    private final PrescriptionRepository prescriptions;
     @jakarta.persistence.PersistenceContext private jakarta.persistence.EntityManager entityManager;
 
-    public InvoiceService(InvoiceRepository invoiceRepository, VisitRepository visitRepository, AuditService audit) {
+    public InvoiceService(InvoiceRepository invoiceRepository, VisitRepository visitRepository, AuditService audit, PrescriptionRepository prescriptions) {
         this.invoiceRepository = invoiceRepository;
-        this.visitRepository = visitRepository;this.audit=audit;
+        this.visitRepository = visitRepository;
+        this.audit = audit;
+        this.prescriptions = prescriptions;
     }
 
     @Transactional(readOnly = true)
@@ -33,6 +37,20 @@ public class InvoiceService {
     public Invoice findById(Long id) {
         return invoiceRepository.findWithDetailsById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy hóa đơn có mã " + id));
+    }
+
+    @Transactional(readOnly = true)
+    public List<PrescribedCharge> prescribedCharges(Long visitId) {
+        return prescriptions.findWithDetailsByVisitId(visitId)
+                .filter(prescription -> "ACTIVE".equals(prescription.getStatus()))
+                .map(prescription -> prescription.getItems().stream().map(item -> {
+                    Medicine medicine = item.getMedicine();
+                    BigDecimal price = item.getUnitPrice().signum() == 0
+                            ? medicine.getUnitPrice() : item.getUnitPrice();
+                    return new PrescribedCharge(medicine.getName() + " (" + medicine.getUnit() + ")",
+                            InvoiceItemCategory.MEDICATION, item.getQuantity(), price, medicine.requiresWholeQuantity() && item.getQuantity().stripTrailingZeros().scale() <= 0);
+                }).toList())
+                .orElseGet(List::of);
     }
 
     public Invoice create(Long visitId, BigDecimal vatRate, List<ItemData> items) {
@@ -111,6 +129,9 @@ public class InvoiceService {
             throw new ConflictException("Chỉ có thể sửa hóa đơn đang ở trạng thái nháp");
         }
     }
+
+    public record PrescribedCharge(String description, InvoiceItemCategory category, BigDecimal quantity,
+                                   BigDecimal unitPrice, boolean wholeQuantity) {}
 
     public record ItemData(String description, InvoiceItemCategory category, BigDecimal quantity, BigDecimal unitPrice) {}
 }

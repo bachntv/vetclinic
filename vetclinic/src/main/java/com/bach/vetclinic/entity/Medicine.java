@@ -63,6 +63,15 @@ public class Medicine extends BaseEntity {
     public String getName() { return name; }
     public String getActiveIngredient() { return activeIngredient; }
     public String getForm() { return form; }
+    public boolean requiresWholeQuantity() {
+        return isWholeUnit(unit);
+    }
+
+    public static boolean isWholeUnit(String unit) {
+        return java.util.Set.of("lọ", "viên", "chai", "tuýp", "gói", "ống", "hộp", "vỉ", "liều", "cái")
+                .contains(unit.strip().toLowerCase(java.util.Locale.ROOT));
+    }
+
     public String getUnit() { return unit; }
     public BigDecimal getStockQuantity() { return stockQuantity; }
     public BigDecimal getReorderLevel() { return reorderLevel; }

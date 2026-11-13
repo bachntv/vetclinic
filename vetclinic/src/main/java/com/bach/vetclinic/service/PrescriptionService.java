@@ -46,7 +46,13 @@ public class PrescriptionService {
   for(Long id:ids)result.put(id,medicines.findByIdForUpdate(id).orElseThrow(()->new NotFoundException("Không tìm thấy thuốc #"+id)));return result;
  }
  private List<PrescriptionItem> build(Prescription p,List<ItemData> items,Map<Long,Medicine> locked,Map<Long,BigDecimal> old){
-  var quantities=new HashMap<Long,BigDecimal>();for(var i:items)quantities.merge(i.medicineId(),i.quantity(),BigDecimal::add);
+  var quantities=new HashMap<Long,BigDecimal>();
+  for (var item : items) {
+   Medicine medicine = locked.get(item.medicineId());
+   if (medicine.requiresWholeQuantity() && item.quantity().stripTrailingZeros().scale() > 0) {
+    throw new ConflictException("Số lượng cấp phải là số nguyên theo đơn vị " + medicine.getUnit());
+   }
+  }for(var i:items)quantities.merge(i.medicineId(),i.quantity(),BigDecimal::add);
   for(var e:quantities.entrySet()){
    var m=locked.get(e.getKey());if(!m.isActive()&&e.getValue().compareTo(old.getOrDefault(e.getKey(),BigDecimal.ZERO))>0)throw new ConflictException("Thuốc đã ngừng sử dụng: "+m.getName());
    if(e.getValue().signum()<=0||m.getStockQuantity().compareTo(e.getValue())<0)throw new ConflictException("Không đủ tồn kho thuốc "+m.getName()+"; còn "+m.getStockQuantity()+" "+m.getUnit());

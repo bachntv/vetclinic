@@ -27,6 +27,7 @@ public class MedicineService {
 
     public Medicine create(String name, String activeIngredient, String form, String unit,
                            BigDecimal stockQuantity, BigDecimal reorderLevel, BigDecimal unitPrice) {
+        validateStock(unit, stockQuantity, reorderLevel);
         return medicineRepository.save(new Medicine(name, activeIngredient, form, unit,
                 stockQuantity, reorderLevel, unitPrice));
     }
@@ -34,8 +35,20 @@ public class MedicineService {
     public Medicine update(Long id, String name, String activeIngredient, String form, String unit,
                            BigDecimal stockQuantity, BigDecimal reorderLevel, BigDecimal unitPrice) {
         Medicine medicine = medicineRepository.findByIdForUpdate(id).orElseThrow(() -> new NotFoundException("Không tìm thấy thuốc"));
+        if (!medicine.getUnit().equalsIgnoreCase(unit.strip()) ||
+                stockQuantity.compareTo(medicine.getStockQuantity()) != 0 ||
+                reorderLevel.compareTo(medicine.getReorderLevel()) != 0) {
+            validateStock(unit, stockQuantity, reorderLevel);
+        }
         medicine.updateDetails(name, activeIngredient, form, unit, stockQuantity, reorderLevel, unitPrice);
         return medicine;
+    }
+
+    private void validateStock(String unit, BigDecimal stockQuantity, BigDecimal reorderLevel) {
+        if (Medicine.isWholeUnit(unit) &&
+                (stockQuantity.stripTrailingZeros().scale() > 0 || reorderLevel.stripTrailingZeros().scale() > 0)) {
+            throw new com.bach.vetclinic.web.ConflictException("Tồn kho và ngưỡng cảnh báo phải là số nguyên theo đơn vị " + unit);
+        }
     }
 
     public Medicine setActive(Long id, boolean active) {

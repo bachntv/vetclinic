@@ -68,6 +68,14 @@ class ClinicWorkflowTests {
         mvc.perform(get("/api/prescriptions/by-pet/"+pet).header("Authorization","Bearer "+vet)).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(1)).andExpect(jsonPath("$[0].prescribedAt").exists()).andExpect(jsonPath("$[0].items[0].medicineName").value("Medicine"));
         mvc.perform(get("/api/prescriptions/by-pet/"+pet).header("Authorization","Bearer "+reception)).andExpect(status().isForbidden());
         change(visit,"COMPLETED");
+        mvc.perform(get("/api/invoices/visits/"+visit+"/prescribed-charges").header("Authorization","Bearer "+reception))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].description").value("Medicine (tablet)"))
+                .andExpect(jsonPath("$[0].category").value("MEDICATION"))
+                .andExpect(jsonPath("$[0].quantity").value(2))
+                .andExpect(jsonPath("$[0].unitPrice").value(100));
+        mvc.perform(get("/api/invoices/visits/"+visit+"/prescribed-charges").header("Authorization","Bearer "+vet))
+                .andExpect(status().isForbidden());
         long invoice=postId("/api/invoices",reception,Map.of("visitId",visit,"vatRate",0.1,"items",List.of(Map.of("description","Consultation","category","CONSULTATION","quantity",1,"unitPrice",100000))));
         mvc.perform(get("/api/invoices/"+invoice).header("Authorization","Bearer "+reception)).andExpect(status().isOk()).andExpect(jsonPath("$.total").value(110000));
         for(String state:List.of("SENT","PAID"))mvc.perform(patch("/api/invoices/"+invoice+"/status").header("Authorization","Bearer "+reception).contentType("application/json").content(json.writeValueAsString(Map.of("status",state)))).andExpect(status().isOk());

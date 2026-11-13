@@ -14,17 +14,17 @@ Khi `generate=true`, hệ thống lọc tối đa 32 đoạn bằng từ khóa, 
 
 ## Bật mô hình cục bộ
 
-Chuẩn bị Ollama cùng mô hình hội thoại và embedding. Cấu hình ứng dụng qua biến môi trường Spring Boot:
+Mở Docker Desktop. Từ thư mục gốc VetClinic, chạy lệnh sau trong PowerShell:
 
 ```powershell
-$env:APP_AI_ENABLED='true'
-$env:APP_AI_URL='http://127.0.0.1:11434'
-$env:APP_AI_MODEL='qwen2.5:7b'
-$env:APP_AI_EMBEDDING_MODEL='nomic-embed-text'
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\start-ai.ps1
 ```
 
-Tên mô hình là cấu hình mặc định, cần tải mô hình tương ứng và đánh giá trên máy triển khai. Không có mô hình được tự tải trong lượt làm việc này. Chỉ cấu hình endpoint được phòng khám cho phép xử lý dữ liệu bệnh án.
+Lần đầu, script khởi động Ollama và tải Qwen2.5 1.5B cùng mô hình embedding nomic-embed-text. Các mô hình được lưu trong Docker volume để tái sử dụng. Script kiểm tra cả hai mô hình bằng dữ liệu giả lập trước khi khởi động lại VetClinic với AI bật. Ollama chỉ được mở trên địa chỉ 127.0.0.1:11435 của máy chạy VetClinic.
 
+Vào **Trợ lý bệnh án**, chọn một hồ sơ có dữ liệu, bật **Tổng hợp bằng AI cục bộ** rồi đặt câu hỏi. Nếu AI gặp lỗi, có thể bấm **Trích hồ sơ cho câu hỏi này** để xem trực tiếp các đoạn khớp.
+
+Có thể dùng tham số `-Model` và `-EmbeddingModel` để chọn mô hình khác. Nếu đã có một Ollama riêng, có thể cấu hình `APP_AI_ENABLED`, `APP_AI_URL`, `APP_AI_MODEL` và `APP_AI_EMBEDDING_MODEL` trong môi trường của tiến trình VetClinic.
 ## Giới hạn cần kiểm chứng
 
 - Chưa dùng pgvector hoặc lưu chỉ mục embedding lâu dài. Embeddings được tính theo yêu cầu cho tập ứng viên đã lọc; phù hợp bản thử nghiệm nhỏ, chưa đo tải lớn.

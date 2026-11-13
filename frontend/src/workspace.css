@@ -19,3 +19,51 @@ aside{position:sticky;top:0;height:100vh;overflow-y:auto;gap:18px}aside nav{gap:
 @media(max-width:850px){.shell aside nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));white-space:normal;gap:12px;overflow:visible}.workspace-identity{padding:10px 14px}.workspace-identity .eyebrow{display:block}.workspace-context{margin-bottom:18px}.nav-section{align-content:start}.nav-heading{margin-top:0}.workspace-welcome{padding:20px}.workspace-welcome h2{font-size:23px}}
 @media(max-width:480px){.workspace-shortcuts{grid-template-columns:1fr}.workspace-context span:last-child{display:none}.shortcut-card{padding:12px}.access-denied{padding:22px}}
 @media print{.workspace-context,.workspace-welcome{display:none!important}}
+
+.prescription-line {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+}
+.prescription-field {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+.prescription-input {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  border: 1px solid #ccd9d2;
+  border-radius: 8px;
+  background: white;
+}
+.prescription-input input {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+  border: 0;
+  border-radius: 7px;
+}
+.prescription-input select,
+.prescription-unit {
+  flex: none;
+  max-width: 55%;
+  padding: 0 8px;
+  border: 0;
+  border-left: 1px solid #ccd9d2;
+  border-radius: 0 7px 7px 0;
+  background: #f6f9f7;
+  color: #365754;
+  font-size: 13px;
+}
+.prescription-input select {
+  width: 7.25rem;
+}
+.prescription-unit {
+  display: flex;
+  align-items: center;
+  overflow-wrap: anywhere;
+}
+.prescription-input input:focus-visible,
+.prescription-input select:focus-visible {
+  outline-offset: -2px;
+}
