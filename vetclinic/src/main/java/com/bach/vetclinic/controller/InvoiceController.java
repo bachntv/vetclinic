@@ -51,6 +51,17 @@ public class InvoiceController {
         return InvoiceResponse.from(invoiceService.create(request.visitId(), request.vatRate(), toItemData(request.items())));
     }
 
+    @PostMapping("/checkout")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONIST')")
+    public InvoiceResponse checkout(@Valid @RequestBody CheckoutRequest request) {
+        var invoice = request.invoice();
+        return InvoiceResponse.from(invoiceService.checkout(request.invoiceId(), invoice.visitId(),
+                invoice.vatRate(), toItemData(invoice.items()), request.targetStatus()));
+    }
+
+    public record CheckoutRequest(@Positive Long invoiceId, @NotNull @Valid InvoiceRequest invoice,
+                                  @NotNull InvoiceStatus targetStatus) {}
+
     @PutMapping("/{id}/items")
     @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONIST')")
     public InvoiceResponse updateItems(@PathVariable Long id, @Valid @RequestBody UpdateInvoiceItemsRequest request) {

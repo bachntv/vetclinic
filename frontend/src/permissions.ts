@@ -1,13 +1,13 @@
 import type { Role, VisitStatus } from './types';
 
-export type PageKey = 'dashboard' | 'appointments' | 'owners' | 'pets' | 'vets' | 'vaccinations' | 'vaccine-types' | 'medicines' | 'invoices' | 'search' | 'notifications' | 'knowledge' | 'assistant' | 'support' | 'users' | 'audit';
+export type PageKey = 'services' | 'dashboard' | 'appointments' | 'owners' | 'pets' | 'vets' | 'vaccinations' | 'vaccine-types' | 'medicines' | 'invoices' | 'search' | 'notifications' | 'knowledge' | 'assistant' | 'support' | 'users' | 'audit';
 export type Permission = 'patients.write' | 'owners.archive' | 'pets.archive' | 'appointments.manage' | 'clinical.write' | 'catalog.manage' | 'invoices.manage' | 'support.manage';
 const all: Role[] = ['ADMIN', 'VET', 'RECEPTIONIST'];
 const clinical: Role[] = ['ADMIN', 'VET'];
 const reception: Role[] = ['ADMIN', 'RECEPTIONIST'];
 
 export const pageRoles: Record<PageKey, readonly Role[]> = {
-  dashboard: all, appointments: all, owners: all, pets: all,
+  services: all, dashboard: all, appointments: all, owners: all, pets: all,
   vets: ['ADMIN'], vaccinations: clinical, 'vaccine-types': clinical, medicines: clinical,
   invoices: reception, search: all, notifications: all, knowledge: clinical,
   assistant: clinical, support: all, users: ['ADMIN'], audit: ['ADMIN'],
@@ -38,7 +38,7 @@ export const roleProfiles: Record<Role, {label: string; title: string; descripti
     sections: [
       {label: 'Điều hành', items: [item('dashboard', 'Tổng quan phòng khám'), item('appointments', 'Lịch hẹn & khám'), item('owners', 'Quản lý chủ nuôi'), item('pets', 'Quản lý thú cưng')]},
       {label: 'Chuyên môn & danh mục', items: [item('vets', 'Quản lý bác sĩ'), item('vaccinations', 'Tiêm chủng'), item('vaccine-types', 'Danh mục vaccine'), item('medicines', 'Thuốc & tồn kho'), item('knowledge', 'Quản lý kiến thức'), item('assistant', 'Trợ lý bệnh án')]},
-      {label: 'Tài chính & hệ thống', items: [item('invoices', 'Hóa đơn & thanh toán'), item('users', 'Tài khoản & vai trò'), item('audit', 'Nhật ký thao tác')]},
+      {label: 'Tài chính & hệ thống', items: [item('services', 'Bảng giá dịch vụ'), item('invoices', 'Hóa đơn & thanh toán'), item('users', 'Tài khoản & vai trò'), item('audit', 'Nhật ký thao tác')]},
       {label: 'Tiện ích', items: [item('search', 'Tìm kiếm'), item('notifications', 'Thông báo'), item('support', 'Quản lý hỗ trợ')]},
     ],
     shortcuts: [item('users', 'Quản lý tài khoản'), item('vets', 'Quản lý bác sĩ'), item('medicines', 'Quản lý kho thuốc'), item('audit', 'Kiểm tra nhật ký')],
@@ -57,7 +57,7 @@ export const roleProfiles: Record<Role, {label: string; title: string; descripti
     label: 'Thu ngân / tiếp nhận', title: 'Không gian thu ngân',
     description: 'Tiếp đón chủ nuôi, quản lý lịch hẹn, tiếp nhận thú cưng và ghi nhận thanh toán.',
     sections: [
-      {label: 'Tiếp nhận & thanh toán', items: [item('dashboard', 'Bàn làm việc thu ngân'), item('appointments', 'Lịch hẹn & tiếp nhận'), item('owners', 'Chủ nuôi'), item('pets', 'Thú cưng'), item('invoices', 'Hóa đơn & thu tiền')]},
+      {label: 'Tiếp nhận & thanh toán', items: [item('dashboard', 'Bàn làm việc thu ngân'), item('appointments', 'Lịch hẹn & tiếp nhận'), item('owners', 'Chủ nuôi'), item('pets', 'Thú cưng'), item('invoices', 'Hóa đơn & thu tiền'), item('services', 'Bảng giá dịch vụ')]},
       {label: 'Tiện ích', items: [item('search', 'Tìm hồ sơ'), item('notifications', 'Nhắc lịch hẹn'), item('support', 'Hỗ trợ của tôi')]},
     ],
     shortcuts: [item('appointments', 'Đặt lịch / tiếp nhận'), item('invoices', 'Lập hóa đơn / thu tiền'), {...item('owners', 'Thêm chủ nuôi'), to: '/owners/new'}, {...item('pets', 'Thêm thú cưng'), to: '/pets/new'}],

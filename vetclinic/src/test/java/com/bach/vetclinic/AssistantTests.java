@@ -78,7 +78,10 @@ class AssistantTests {
     }
     @Test void generationUsesRetrievedSourcesAndFailureIsExplicit()throws Exception {
         when(ai.rank(anyString(),anyList())).thenAnswer(i->i.getArgument(1));
-        when(ai.generate(anyString(),anyList())).thenReturn("Kết quả kiểm thử có nguồn.");
+        when(ai.generate(anyString(),anyList())).thenAnswer(invocation -> {
+            List<AssistantService.Source> sources = invocation.getArgument(1);
+            return new LocalAiGateway.GeneratedAnswer("Kết quả kiểm thử có nguồn.", List.of(sources.get(0).id()));
+        });
         ask(vet,pet,"chẩn đoán",true).andExpect(status().isOk()).andExpect(jsonPath("$.mode").value("LOCAL_RAG"));
         when(ai.generate(anyString(),anyList())).thenThrow(new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,"Model offline"));
         ask(vet,pet,"chẩn đoán",true).andExpect(status().isServiceUnavailable()).andExpect(jsonPath("$.detail").value("Model offline"));

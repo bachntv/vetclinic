@@ -28,3 +28,5 @@ export type SearchResults=Record<'owners'|'pets'|'visits',SearchRow[]>;
 export interface NotificationRow {id:number;petId?:number;petName?:string;name?:string;scheduledAt?:string;nextDueDate?:string|null;followUpDate?:string|null;stockQuantity?:number;unit?:string}
 export type NotificationsData=Record<'appointments'|'vaccinations'|'followUps'|'lowStock',NotificationRow[]>;
 
+
+export interface ClinicService extends Base {name:string;category:InvoiceCategory;unitPrice:number;description:string|null;active:boolean}

@@ -61,7 +61,16 @@ public class AssistantService {
                 .limit(32).toList();
         if(candidates.isEmpty()) return new Answer("NO_EVIDENCE","Không tìm thấy dữ liệu phù hợp trong hồ sơ đã chọn. Hãy đổi câu hỏi hoặc bổ sung hồ sơ.",List.of(),true);
         var sources=generate?ai.rank(question,candidates):candidates.stream().limit(6).toList();
-        if(generate) return new Answer("LOCAL_RAG",ai.generate(question,sources),sources,false);
+        if (generate) {
+            var generated = ai.generate(question, sources);
+            if (generated.sourceIds().isEmpty()) {
+                return new Answer("NO_EVIDENCE", "Chưa đủ thông tin trong hồ sơ để trả lời câu hỏi này.", List.of(), true);
+            }
+            var cited = sources.stream().filter(source -> generated.sourceIds().contains(source.id())).toList();
+            String citations = generated.sourceIds().stream().map(id -> "[" + id + "]")
+                    .collect(java.util.stream.Collectors.joining(" "));
+            return new Answer("LOCAL_RAG", generated.text() + " " + citations, cited, false);
+        }
         String answer=sources.stream().map(s->"["+s.id()+"] "+s.text()).collect(java.util.stream.Collectors.joining("\n\n"));
         return new Answer("EXTRACTIVE","Thông tin trích từ dữ liệu hiện có:\n\n"+answer,sources,false);
     }

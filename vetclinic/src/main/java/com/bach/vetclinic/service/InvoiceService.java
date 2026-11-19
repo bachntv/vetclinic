@@ -74,6 +74,36 @@ public class InvoiceService {
         return invoice;
     }
 
+    public Invoice checkout(Long invoiceId, Long visitId, BigDecimal vatRate, List<ItemData> items,
+                            InvoiceStatus targetStatus) {
+        if (targetStatus != InvoiceStatus.SENT && targetStatus != InvoiceStatus.PAID) {
+            throw new ConflictException("Chọn chờ thanh toán hoặc đã thu đủ tiền");
+        }
+        // Serialize against prescription changes and other checkouts for the same visit.
+        visitRepository.findWithDetailsByIdForUpdate(visitId)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy lượt khám"));
+        Invoice invoice;
+        if (invoiceId == null) {
+            if (invoiceRepository.existsByVisitIdAndStatusIn(visitId, List.of(InvoiceStatus.values()))) {
+                throw new ConflictException("Lượt khám đã có hóa đơn. Hãy mở lại danh sách để kiểm tra.");
+            }
+            invoice = create(visitId, vatRate, items);
+        } else {
+            invoice = findById(invoiceId);
+            if (!invoice.getVisit().getId().equals(visitId)) {
+                throw new ConflictException("Hóa đơn không thuộc lượt khám đã chọn");
+            }
+            invoice = updateDraftItems(invoiceId, vatRate, items);
+        }
+        entityManager.flush();
+        invoice = changeStatus(invoice.getId(), InvoiceStatus.SENT);
+        if (targetStatus == InvoiceStatus.PAID) {
+            entityManager.flush();
+            invoice = changeStatus(invoice.getId(), InvoiceStatus.PAID);
+        }
+        return invoice;
+    }
+
     public Invoice changeStatus(Long id, InvoiceStatus nextStatus) {
         Invoice invoice = lockForChange(id);
         var previous=invoice.getStatus().name();
